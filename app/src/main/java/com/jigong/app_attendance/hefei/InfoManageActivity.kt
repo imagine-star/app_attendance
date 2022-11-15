@@ -21,7 +21,7 @@ class InfoManageActivity : BaseActivity() {
 
     private lateinit var binding: ActivityInfoManageBinding
 
-    private val limitCount = 50;
+    private val limitCount = 50
     private val workerInfoDao = MyApplication.getApplication().daoSession.workerInfoDao
     private val attendanceInfoDao = MyApplication.getApplication().daoSession.attendanceInfoDao
 
@@ -172,6 +172,7 @@ class InfoManageActivity : BaseActivity() {
             val getAttendance = async {
                 doPostJson(PublicTopicAddress.QUERY_PROJECT_SIGN_LIST, map)
             }
+            getAttendance.join()
             dealAttendanceInfo(getAttendance.await())
         }
     }

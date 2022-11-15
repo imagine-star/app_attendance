@@ -99,17 +99,14 @@ public class MainActivity extends BaseActivity {
 
                             startActivity(new Intent(MainActivity.this, InfoManageActivity.class));
                             finish();
-                            return;
                         } else {
                             showToastMsgShort(respMsg);
-                            return;
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
                 } else {
                     showToastMsgShort("网络错误");
-                    return;
                 }
             }
 

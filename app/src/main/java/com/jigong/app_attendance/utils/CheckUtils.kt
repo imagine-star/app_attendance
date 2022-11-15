@@ -13,10 +13,12 @@ import org.json.JSONObject
 * 返回值检验
 * */
 fun checkResult(result: String): Boolean {
-    val jsonObject = JSONObject(result)
-    val respCode = JsonUtils.getJsonValue(jsonObject, "respCode", "")
-    if (respCode == "1") {
-        return true
+    if (!TextUtils.isEmpty(result)) {
+        val jsonObject = JSONObject(result)
+        val respCode = JsonUtils.getJsonValue(jsonObject, "respCode", "")
+        if (respCode == "1") {
+            return true
+        }
     }
     return false
 }

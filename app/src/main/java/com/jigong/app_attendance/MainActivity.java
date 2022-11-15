@@ -31,6 +31,8 @@ public class MainActivity extends BaseActivity {
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         View view = binding.getRoot();
         setContentView(view);
+        User.getInstance().setInOnline(false);
+        User.getInstance().setOutOnline(false);
         if (User.getInstance().getLogin()) {
             startActivity(new Intent(MainActivity.this, InfoManageActivity.class));
             finish();
@@ -81,12 +83,14 @@ public class MainActivity extends BaseActivity {
                             JSONObject dataObject = JsonUtils.getJSONObject(entry, "result");
                             String userName = "jigong";
                             String passWord = "XmcXQNjTUNq@RqN7";
+                            String account = binding.userName.getText().toString().trim();
                             String projectId = binding.passWard.getText().toString().trim();
                             String projectName = JsonUtils.getJsonValue(dataObject, "projectName", "");
                             String token = JsonUtils.getJsonValue(dataObject, "token", "");
 
                             User.getInstance().setUserName(userName);
                             User.getInstance().setPassWord(passWord);
+                            User.getInstance().setAccount(account);
                             User.getInstance().setProjectId(projectId);
                             User.getInstance().setProjectName(projectName);
                             User.getInstance().setToken(token);

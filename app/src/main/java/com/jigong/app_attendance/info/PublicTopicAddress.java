@@ -25,7 +25,12 @@ public class PublicTopicAddress {
     /*
      *济工网平台上传工人信息
      * */
-    public static String GET_WORKER = "";
+    public static String UPLOAD_WORKER = "api/worker/uploadWorker/v1";
+
+    /*
+     *项目考勤查询
+     * */
+    public static String QUERY_PROJECT_SIGN_LIST = "api/sign/queryProjectSignList/v1";
 
     /*
      * 合肥平台指令前缀

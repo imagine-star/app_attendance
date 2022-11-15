@@ -21,9 +21,16 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.App_attendance"
         android:usesCleartextTraffic="true">
-        <activity android:name=".hefei.InfoManageActivity" />
-        <activity android:name=".BaseActivity" />
-        <activity android:name=".MainActivity">
+        <activity android:name=".hefei.InfoManageActivity"
+            android:screenOrientation="portrait"
+            tools:ignore="LockedOrientationActivity" />
+        <activity android:name=".BaseActivity"
+            android:screenOrientation="portrait"
+            tools:ignore="LockedOrientationActivity" />
+        <activity
+            android:name=".MainActivity"
+            android:screenOrientation="portrait"
+            tools:ignore="LockedOrientationActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

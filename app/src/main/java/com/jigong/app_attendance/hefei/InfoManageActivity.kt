@@ -5,20 +5,25 @@ import android.os.*
 import com.jigong.app_attendance.BaseActivity
 import com.jigong.app_attendance.MainActivity
 import com.jigong.app_attendance.MyApplication
+import com.jigong.app_attendance.bean.AttendanceInfo
 import com.jigong.app_attendance.databinding.ActivityInfoManageBinding
 import com.jigong.app_attendance.info.PublicTopicAddress
 import com.jigong.app_attendance.info.User
+import com.jigong.app_attendance.utils.JsonUtils
+import com.jigong.app_attendance.utils.checkResult
 import com.jigong.app_attendance.utils.doPostJson
 import kotlinx.coroutines.*
+import org.json.JSONObject
 import java.util.Timer
 import java.util.TimerTask
 
 class InfoManageActivity : BaseActivity() {
 
     private lateinit var binding: ActivityInfoManageBinding
-    private val thread = HeFeiMqttThread()
 
+    private val limitCount = 50;
     private val workerInfoDao = MyApplication.getApplication().daoSession.workerInfoDao
+    private val attendanceInfoDao = MyApplication.getApplication().daoSession.attendanceInfoDao
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,13 +50,11 @@ class InfoManageActivity : BaseActivity() {
                 * */
                 Timer().schedule(object : TimerTask() {
                     override fun run() {
-                        launch(Dispatchers.IO) {
-                            if (workerInfoDao.queryBuilder().count() > 0) {
-                                val getInfo = async {
-                                    pushWorkerInfo()
-                                }
-                                dealWorkerInfo(getInfo.await())
-                            }
+                        if (isFinishing) {
+                            cancel()
+                        }
+                        if (workerInfoDao.queryBuilder().count() > 0) {
+                            pushWorkerInfo()
                         }
                     }
                 }, 0, 30 * 1000)
@@ -60,25 +63,117 @@ class InfoManageActivity : BaseActivity() {
                 * */
                 Timer().schedule(object : TimerTask() {
                     override fun run() {
+                        if (isFinishing) {
+                            cancel()
+                        }
                         getWorkerAttendance()
+                    }
+                }, 0, 30 * 1000)
+                /*
+                * 向合肥平台推送工人考勤信息（考勤信息表不为空时调用），三分钟左右一次
+                * */
+                Timer().schedule(object : TimerTask() {
+                    override fun run() {
+                        if (isFinishing) {
+                            cancel()
+                        }
+                        if (attendanceInfoDao.queryBuilder().count() > 0) {
+                            pushWorkerAttendance()
+                        }
                     }
                 }, 0, 30 * 1000)
             }
         }
     }
 
-    private fun pushWorkerInfo(): String {
-        val dataMap = HashMap<String, Any>()
-        dataMap["2"] = "2"
-        return doPostJson(PublicTopicAddress.GET_WORKER, dataMap)
+    private fun pushWorkerAttendance() = runBlocking {
+        launch(Dispatchers.IO) {
+            val attendanceList = if (attendanceInfoDao.count() > limitCount) {
+                attendanceInfoDao.queryBuilder().limit(limitCount).list()
+            } else {
+                attendanceInfoDao.loadAll()
+            }
+            attendanceList.forEach {
+                pushAttendance(
+                    it,
+                    if (it.machineType == "02") User.getInstance().inDeviceNo else User.getInstance().outDeviceNo
+                )
+            }
+        }
     }
 
-    private fun dealWorkerInfo(infoString: String) {
-
+    private fun pushWorkerInfo() = runBlocking {
+        launch(Dispatchers.IO) {
+            val workerList = if (workerInfoDao.count() > limitCount) {
+                workerInfoDao.queryBuilder().limit(limitCount).list()
+            } else {
+                workerInfoDao.loadAll()
+            }
+            workerList.forEach {
+                val map = HashMap<String, Any>()
+                map["joinCity"] = User.getInstance().account
+                map["projectId"] = User.getInstance().projectId
+                val listMap = ArrayList<Map<String, String>>()
+                val dataMap = HashMap<String, String>()
+                dataMap["idNumber"] = it.idCard
+                dataMap["name"] = it.name
+                dataMap["photo"] = it.picURI
+                listMap.add(dataMap)
+                map["workerList"] = listMap
+                val pushInfo = async {
+                    doPostJson(PublicTopicAddress.UPLOAD_WORKER, map)
+                }
+                if (checkResult(pushInfo.await())) {
+                    workerInfoDao.delete(it)
+                }
+            }
+        }
     }
 
-    private fun getWorkerAttendance() {
+    private fun dealAttendanceInfo(infoString: String) {
+        if (checkResult(infoString)) {
+            val jsonObject = JSONObject(infoString)
+            val entry = JsonUtils.getJSONObject(jsonObject, "entry")
+            if (entry != null) {
+                val rowId = JsonUtils.getJsonValue(entry, "queryRowId", "0")
+                User.getInstance().rowId = rowId
+                val jsonArray = JsonUtils.getJSONArray(entry, "result")
+                if (jsonArray != null && jsonArray.length() > 0) {
+                    for (i in 0 until jsonArray.length()) {
+                        val dataObject = jsonArray.getJSONObject(i)
+                        if (dataObject != null) {
+                            val attendanceInfo = AttendanceInfo()
+                            attendanceInfo.attendanceId = JsonUtils.getJsonValue(dataObject, "attendanceId", "")
+                            attendanceInfo.checkinTime = JsonUtils.getJsonValue(dataObject, "checkinTime", "")
+                            attendanceInfo.deviceSerialNo = JsonUtils.getJsonValue(dataObject, "deviceSerialNo", "")
+                            attendanceInfo.machineType = JsonUtils.getJsonValue(dataObject, "machineType", "")
+                            attendanceInfo.normalSignImage = JsonUtils.getJsonValue(dataObject, "normalSignImage", "")
+                            attendanceInfo.projectId = JsonUtils.getJsonValue(dataObject, "projectId", "")
+                            attendanceInfo.redSignImage = JsonUtils.getJsonValue(dataObject, "redSignImage", "")
+                            attendanceInfo.subcontractorId = JsonUtils.getJsonValue(dataObject, "subcontractorId", "")
+                            attendanceInfo.temperature = JsonUtils.getJsonValue(dataObject, "temperature", "")
+                            attendanceInfo.workerId = JsonUtils.getJsonValue(dataObject, "workerId", "")
+                            attendanceInfo.workerName = JsonUtils.getJsonValue(dataObject, "workerName", "")
+                            attendanceInfo.idNumber = JsonUtils.getJsonValue(dataObject, "idNumber", "")
+                            attendanceInfoDao.insert(attendanceInfo)
+                        }
+                    }
+                }
+            }
+        }
+    }
 
+    private fun getWorkerAttendance() = runBlocking {
+        launch(Dispatchers.IO) {
+            val map = HashMap<String, Any>()
+            map["projectId"] = User.getInstance().projectId
+            map["queryRowId"] = User.getInstance().rowId
+            map["signDate"] = ""
+            val getAttendance = async {
+                doPostJson(PublicTopicAddress.QUERY_PROJECT_SIGN_LIST, map)
+            }
+            dealAttendanceInfo(getAttendance.await())
+        }
     }
 
     /*
@@ -109,7 +204,6 @@ class InfoManageActivity : BaseActivity() {
     private fun initView() {
         binding.projectName.text = User.getInstance().projectName
         binding.signOut.setOnClickListener {
-            thread.stop = true
             signOut()
         }
         binding.inDeviceNo.text = User.getInstance().inDeviceNo
@@ -137,8 +231,13 @@ class InfoManageActivity : BaseActivity() {
     }
 
     override fun onDestroy() {
-        thread.stop = true
-        super.onDestroy()
+        runBlocking {
+            launch(Dispatchers.IO) {
+                getOffline(User.getInstance().inDeviceNo)
+                getOffline(User.getInstance().outDeviceNo)
+            }.join()
+            super.onDestroy()
+        }
     }
 
 }

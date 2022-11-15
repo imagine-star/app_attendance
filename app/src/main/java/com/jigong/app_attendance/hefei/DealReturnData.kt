@@ -1,7 +1,9 @@
 package com.jigong.app_attendance.hefei
 
+import android.text.TextUtils
 import com.jigong.app_attendance.MyApplication
 import com.jigong.app_attendance.bean.WorkerInfo
+import com.jigong.app_attendance.greendao.AttendanceInfoDao
 import com.jigong.app_attendance.greendao.WorkerInfoDao
 import com.jigong.app_attendance.info.User
 import com.jigong.app_attendance.utils.JsonUtils
@@ -25,6 +27,10 @@ const val ONLINE = "Online-Ack"
 * 订阅获取工人信息返回值的标识
 * */
 const val GET_WORKER = "EditPersonsNew"
+/*
+* 上传考勤返回消息
+* */
+const val ATTENDANCE_RESULT = "PushAck"
 
 /*
 * 服务返回数据分发中心，通过此函数处理不同类型的数据返回
@@ -39,7 +45,23 @@ fun dealManager(deviceNo: String, message: String) {
         //设备上线请求的返回，据此修改设备在线状态为在线，让等待的行为进入循环
         ONLINE -> dealOnline(deviceNo, jsonObject)
         GET_WORKER -> dealWorkerInfo(deviceNo, jsonObject)
+        ATTENDANCE_RESULT -> deleteAttendance(jsonObject)
         else -> return
+    }
+}
+
+/*
+* 上传考勤返回相应的成功后，应该将对应考勤删除
+* */
+private fun deleteAttendance(jsonObject: JSONObject) {
+    val attendanceInfoDao = MyApplication.getApplication().daoSession.attendanceInfoDao
+    val info = JsonUtils.getJSONObject(jsonObject, "info")
+    if (info != null) {
+        val recordId = JsonUtils.getJsonValue(info, "SnapOrRecordID", "")
+        if (!TextUtils.isEmpty(recordId)) {
+            val attendanceInfo = attendanceInfoDao.queryBuilder().where(AttendanceInfoDao.Properties.AttendanceId.eq(recordId)).unique()
+            attendanceInfoDao.delete(attendanceInfo)
+        }
     }
 }
 

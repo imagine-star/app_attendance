@@ -3,12 +3,7 @@ package com.jigong.app_attendance.hefei
 import android.os.SystemClock
 import com.jigong.app_attendance.MyApplication
 import com.jigong.app_attendance.info.PublicTopicAddress
-import com.jigong.app_attendance.info.User
 import com.jigong.app_attendance.utils.doPostJson
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import java.util.concurrent.atomic.AtomicLong
 
 /**
@@ -60,7 +55,7 @@ class HeFeiMqttThread : Thread() {
     fun pushWorkerInfo() {
         val dataMap = HashMap<String, Any>()
         dataMap["2"] = "2"
-        dealWorkerInfo(doPostJson(PublicTopicAddress.GET_WORKER, dataMap))
+        dealWorkerInfo(doPostJson(PublicTopicAddress.UPLOAD_WORKER, dataMap))
     }
 
     fun dealWorkerInfo(infoString: String) {

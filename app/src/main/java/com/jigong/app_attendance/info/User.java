@@ -17,6 +17,8 @@ public class User {
     private final String OUT_ONLINE = "OUT_ONLINE";
     private final String LOGIN = "LOGIN";
     private final String TOKEN = "TOKEN";
+    private final String ACCOUNT = "ACCOUNT";
+    private final String ROWID = "ROWID";
 
     private final SavedSharedPreferences mPreferences;
 
@@ -32,6 +34,22 @@ public class User {
     private User() {
         super();
         mPreferences = SavedSharedPreferences.getInstance();
+    }
+
+    public String getRowId() {
+        return mPreferences.getStringValue(ROWID, "0");
+    }
+
+    public void setRowId(String rowId) {
+        mPreferences.setStringValue(ROWID, rowId);
+    }
+
+    public String getAccount() {
+        return mPreferences.getStringValue(ACCOUNT);
+    }
+
+    public void setAccount(String account) {
+        mPreferences.setStringValue(ACCOUNT, account);
     }
 
     public String getToken() {

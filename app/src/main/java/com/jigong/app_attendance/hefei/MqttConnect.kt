@@ -5,6 +5,10 @@ import com.jigong.app_attendance.bean.AttendanceInfo
 import com.jigong.app_attendance.info.PublicTopicAddress
 import com.jigong.app_attendance.info.User
 import com.jigong.app_attendance.utils.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 /**
  * @Author LiuHaoQi
@@ -56,5 +60,15 @@ fun pushReplyWorkerInfo(messageId: String, sucNum: Int, errNum: Int, deviceNo: S
 /*
 * Mqtt向平台推送考勤数据
 * */
-fun pushAttendance(attendanceInfo: AttendanceInfo, deviceNo: String) =
-        push(PublicTopicAddress.TOPIC_PREFIX + deviceNo + "/Rec", JSON.toJSONString(getAttendanceDataMap(deviceNo, attendanceInfo)), deviceNo)
+fun pushAttendance(attendanceInfo: AttendanceInfo, deviceNo: String) = runBlocking {
+        /*
+        * 由于上传参数中有需要网络获取的图片数据
+        * 所以在这里使用协程下载图片
+        * */
+        launch(Dispatchers.IO) {
+                val getMap = async {
+                        getAttendanceDataMap(deviceNo, attendanceInfo)
+                }
+                push(PublicTopicAddress.TOPIC_PREFIX + deviceNo + "/Rec", JSON.toJSONString(getMap.await()), deviceNo)
+        }.join()
+}

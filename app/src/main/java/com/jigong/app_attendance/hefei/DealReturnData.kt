@@ -7,9 +7,9 @@ import com.jigong.app_attendance.greendao.AttendanceInfoDao
 import com.jigong.app_attendance.greendao.WorkerInfoDao
 import com.jigong.app_attendance.info.User
 import com.jigong.app_attendance.utils.JsonUtils
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -98,10 +98,8 @@ private fun dealWorkerInfo(deviceNo: String, jsonObject: JSONObject) {
             errNum--
         }
     }
-    runBlocking {
-        launch(Dispatchers.IO) {
-            pushReplyWorkerInfo(messageId, sucNum, errNum, deviceNo)
-        }
+    CoroutineScope(Dispatchers.IO).launch {
+        pushReplyWorkerInfo(messageId, sucNum, errNum, deviceNo)
     }
 }
 

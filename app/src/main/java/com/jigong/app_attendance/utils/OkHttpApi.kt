@@ -76,6 +76,11 @@ fun doPostJson(url: String, params: Map<String, Any>): String {
         .url(targetUrl)
         .post(requestBody)
         .build()
-    val response = okHttpClient.newCall(request).execute()
-    return response.body?.string().toString()
+    try {
+        val response = okHttpClient.newCall(request).execute()
+        return response.body?.string().toString()
+    } catch (e: IOException) {
+        e.printStackTrace()
+    }
+    return ""
 }

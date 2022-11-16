@@ -22,3 +22,17 @@ fun checkResult(result: String): Boolean {
     }
     return false
 }
+
+/*
+* 返回值检验
+* */
+fun checkLogin(result: String): Boolean {
+    if (!TextUtils.isEmpty(result)) {
+        val jsonObject = JSONObject(result)
+        val respCode = JsonUtils.getJsonValue(jsonObject, "respCode", "")
+        if (respCode == "-99") {
+            return false
+        }
+    }
+    return true
+}

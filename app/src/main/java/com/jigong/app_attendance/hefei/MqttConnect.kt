@@ -5,10 +5,7 @@ import com.jigong.app_attendance.bean.AttendanceInfo
 import com.jigong.app_attendance.info.PublicTopicAddress
 import com.jigong.app_attendance.info.User
 import com.jigong.app_attendance.utils.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 
 /**
  * @Author LiuHaoQi
@@ -39,7 +36,12 @@ fun getBasic(deviceNo: String) = get(PublicTopicAddress.TOPIC_PREFIX + deviceNo,
 /*
 * Mqtt推送设备在线相关信息
 * */
-fun pushBasicOnline(deviceNo: String) = push(PublicTopicAddress.BASIC_PUSH, JSON.toJSONString(getOnlineDataMap(deviceNo)), deviceNo)
+suspend fun pushBasicOnline(deviceNo: String) = withContext(Dispatchers.IO) {
+        val getMap = async {
+                getOnlineDataMap(deviceNo)
+        }
+        push(PublicTopicAddress.BASIC_PUSH, JSON.toJSONString(getMap.await()), deviceNo)
+}
 
 /*
 * Mqtt推送设备心跳
@@ -60,15 +62,13 @@ fun pushReplyWorkerInfo(messageId: String, sucNum: Int, errNum: Int, deviceNo: S
 /*
 * Mqtt向平台推送考勤数据
 * */
-fun pushAttendance(attendanceInfo: AttendanceInfo, deviceNo: String) = runBlocking {
+suspend fun pushAttendance(attendanceInfo: AttendanceInfo, deviceNo: String) = withContext(Dispatchers.IO) {
         /*
         * 由于上传参数中有需要网络获取的图片数据
         * 所以在这里使用协程下载图片
         * */
-        launch(Dispatchers.IO) {
-                val getMap = async {
-                        getAttendanceDataMap(deviceNo, attendanceInfo)
-                }
-                push(PublicTopicAddress.TOPIC_PREFIX + deviceNo + "/Rec", JSON.toJSONString(getMap.await()), deviceNo)
-        }.join()
+        val getMap = async {
+                getAttendanceDataMap(deviceNo, attendanceInfo)
+        }
+        push(PublicTopicAddress.TOPIC_PREFIX + deviceNo + "/Rec", JSON.toJSONString(getMap.await()), deviceNo)
 }

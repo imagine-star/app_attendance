@@ -19,6 +19,7 @@ public class User {
     private final String TOKEN = "TOKEN";
     private final String ACCOUNT = "ACCOUNT";
     private final String ROWID = "ROWID";
+    private final String SIGN_DATE = "SIGN_DATE";
 
     private final SavedSharedPreferences mPreferences;
 
@@ -34,6 +35,14 @@ public class User {
     private User() {
         super();
         mPreferences = SavedSharedPreferences.getInstance();
+    }
+
+    public String getSignDate() {
+        return mPreferences.getStringValue(SIGN_DATE, "");
+    }
+
+    public void setSignDate(String signDate) {
+        mPreferences.setStringValue(SIGN_DATE, signDate);
     }
 
     public String getRowId() {

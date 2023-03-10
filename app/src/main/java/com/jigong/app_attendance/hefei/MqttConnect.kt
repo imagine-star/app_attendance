@@ -16,22 +16,30 @@ import kotlinx.coroutines.*
 /*
 * Mqtt连接初始化
 * */
-fun mqttStart(deviceNo: String) = MyMqttClient.getInstance(User.getInstance().userName, User.getInstance().passWord, deviceNo)
+suspend fun mqttStart(deviceNo: String) = withContext(Dispatchers.IO) {
+        MyMqttClient.getInstance(User.getInstance().userName, User.getInstance().passWord, deviceNo)
+}
 
 /*
 * 订阅函数调用简化
 * */
-fun get(topic: String, deviceNo: String) = MyMqttClient.subTopic(topic, User.getInstance().userName, User.getInstance().passWord, deviceNo)
+suspend fun get(topic: String, deviceNo: String) = withContext(Dispatchers.IO) {
+        MyMqttClient.subTopic(topic, User.getInstance().userName, User.getInstance().passWord, deviceNo)
+}
 
 /*
 * 推送函数调用简化
 * */
-fun push(topic: String, data: String, deviceNo: String) = MyMqttClient.pub(topic, data, User.getInstance().userName, User.getInstance().passWord, deviceNo)
+suspend fun push(topic: String, data: String, deviceNo: String) = withContext(Dispatchers.IO) {
+        MyMqttClient.pub(topic, data, User.getInstance().userName, User.getInstance().passWord, deviceNo)
+}
 
 /*
 * Mqtt订阅设备在线主题
 * */
-fun getBasic(deviceNo: String) = get(PublicTopicAddress.TOPIC_PREFIX + deviceNo, deviceNo)
+suspend fun getBasic(deviceNo: String) = withContext(Dispatchers.IO) {
+        get(PublicTopicAddress.TOPIC_PREFIX + deviceNo, deviceNo)
+}
 
 /*
 * Mqtt推送设备在线相关信息
@@ -46,18 +54,23 @@ suspend fun pushBasicOnline(deviceNo: String) = withContext(Dispatchers.IO) {
 /*
 * Mqtt推送设备心跳
 * */
-fun pushHeartbeat(deviceNo: String) = push(PublicTopicAddress.HEARTBEAT_PUSH, JSON.toJSONString(getHeartbeatDataMap(deviceNo)), deviceNo)
+suspend fun pushHeartbeat(deviceNo: String) = withContext(Dispatchers.IO) {
+        push(PublicTopicAddress.HEARTBEAT_PUSH, JSON.toJSONString(getHeartbeatDataMap(deviceNo)), deviceNo)
+}
 
 /*
 * Mqtt推送设备下线相关信息
 * */
-fun pushBasicOffline(deviceNo: String) = push(PublicTopicAddress.BASIC_PUSH, JSON.toJSONString(getOfflineDataMap(deviceNo)), deviceNo)
+suspend fun pushBasicOffline(deviceNo: String) = withContext(Dispatchers.IO) {
+        push(PublicTopicAddress.BASIC_PUSH, JSON.toJSONString(getOfflineDataMap(deviceNo)), deviceNo)
+}
 
 /*
 * Mqtt推送指令回复--接收下发人员信息
 * */
-fun pushReplyWorkerInfo(messageId: String, sucNum: Int, errNum: Int, deviceNo: String) =
+suspend fun pushReplyWorkerInfo(messageId: String, sucNum: Int, errNum: Int, deviceNo: String) = withContext(Dispatchers.IO) {
         push(PublicTopicAddress.TOPIC_PREFIX + deviceNo + "/Ack", JSON.toJSONString(getReplyGetWorkerInfoDataMap(deviceNo, messageId, sucNum, errNum)), deviceNo)
+}
 
 /*
 * Mqtt向平台推送考勤数据

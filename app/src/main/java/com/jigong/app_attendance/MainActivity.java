@@ -39,7 +39,7 @@ public class MainActivity extends BaseActivity {
         } else {
             binding.passWard.setText("c8d852733a964d0ab99543be23e93dcf");
             binding.login.setOnClickListener(view1 -> {
-                binding.login.setClickable(false);
+                binding.login.setOnClickListener(null);
                 loadData();
             });
         }

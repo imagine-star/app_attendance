@@ -2,6 +2,7 @@ package com.jigong.app_attendance.hefei
 
 import android.content.Intent
 import android.os.*
+import androidx.lifecycle.lifecycleScope
 import com.jigong.app_attendance.BaseActivity
 import com.jigong.app_attendance.MainActivity
 import com.jigong.app_attendance.MyApplication
@@ -15,6 +16,8 @@ import com.jigong.app_attendance.utils.checkResult
 import com.jigong.app_attendance.utils.doPostJson
 import kotlinx.coroutines.*
 import org.json.JSONObject
+import java.io.EOFException
+import java.net.SocketException
 import java.util.Timer
 import java.util.TimerTask
 
@@ -32,14 +35,16 @@ class InfoManageActivity : BaseActivity() {
         val view = binding.root
         setContentView(view)
         initView()
-        CoroutineScope(Dispatchers.IO).launch {
+        lifecycleScope.launch {
             getOnline(User.getInstance().inDeviceNo)
             getOnline(User.getInstance().outDeviceNo)
             while (true) {
                 if (User.getInstance().inOnline && User.getInstance().outOnline) {
                     println("平台上线请求成功")
                     println("平台上线结束，开始对济工网平台进行数据处理")
-                    binding.connectStatus.text = "连接成功"
+                    launch(Dispatchers.Main) {
+                        binding.connectStatus.text = "连接成功"
+                    }
                     break
                 }
             }
@@ -52,7 +57,7 @@ class InfoManageActivity : BaseActivity() {
                         cancel()
                     }
                     if (workerInfoDao.queryBuilder().count() > 0) {
-                        launch(Dispatchers.IO) {
+                        lifecycleScope.launch {
                             pushWorkerInfo()
                         }
                     }
@@ -66,7 +71,7 @@ class InfoManageActivity : BaseActivity() {
                     if (isFinishing) {
                         cancel()
                     }
-                    CoroutineScope(Dispatchers.IO).launch {
+                    lifecycleScope.launch {
                         getWorkerAttendance()
                     }
                 }
@@ -80,7 +85,7 @@ class InfoManageActivity : BaseActivity() {
                         cancel()
                     }
                     if (attendanceInfoDao.queryBuilder().count() > 0) {
-                        launch(Dispatchers.IO) {
+                        lifecycleScope.launch {
                             pushWorkerAttendance()
                         }
                     }
@@ -174,14 +179,15 @@ class InfoManageActivity : BaseActivity() {
                 }
             }
         } else if (!checkLogin(infoString)) {
-            signOut()
+            lifecycleScope.launch {
+                signOut()
+            }
         }
     }
 
     private suspend fun getWorkerAttendance() = withContext(Dispatchers.IO) {
         val map = HashMap<String, Any>()
         map["projectId"] = User.getInstance().projectId
-        map["sn"] = deviceSN
         map["queryRowId"] = User.getInstance().rowId
         map["signDate"] = User.getInstance().signDate
         val getAttendance = async {
@@ -194,9 +200,17 @@ class InfoManageActivity : BaseActivity() {
     * 请求设备上线，设备开始心跳
     * */
     private suspend fun getOnline(deviceNo: String) = withContext(Dispatchers.IO) {
-        mqttStart(deviceNo)
-        getBasic(deviceNo)
-        pushBasicOnline(deviceNo)
+        try {
+            mqttStart(deviceNo)
+            getBasic(deviceNo)
+            pushBasicOnline(deviceNo)
+        } catch (e: IllegalArgumentException) {
+            e.printStackTrace()
+        } catch (e: EOFException) {
+            e.printStackTrace()
+        } catch (e: SocketException) {
+            e.printStackTrace()
+        }
         /*
         * 设备心跳定时器，30秒左右请求一次
         * */
@@ -205,8 +219,16 @@ class InfoManageActivity : BaseActivity() {
                 if (isFinishing) {
                     cancel()
                 }
-                CoroutineScope(Dispatchers.IO).launch {
-                    pushHeartbeat(deviceNo)
+                lifecycleScope.launch {
+                    try {
+                        pushHeartbeat(deviceNo)
+                    } catch (e: IllegalArgumentException) {
+                        e.printStackTrace()
+                    } catch (e: EOFException) {
+                        e.printStackTrace()
+                    } catch (e: SocketException) {
+                        e.printStackTrace()
+                    }
                 }
             }
         }, 30 * 1000, 30 * 1000)
@@ -215,12 +237,16 @@ class InfoManageActivity : BaseActivity() {
     /*
     * 设备下线请求
     * */
-    private fun getOffline(deviceNo: String) = pushBasicOffline(deviceNo)
+    private suspend fun getOffline(deviceNo: String) = withContext(Dispatchers.IO) {
+        pushBasicOffline(deviceNo)
+    }
 
     private fun initView() {
         binding.projectName.text = User.getInstance().projectName
         binding.signOut.setOnClickListener {
-            signOut()
+            lifecycleScope.launch {
+                signOut()
+            }
         }
         binding.inDeviceNo.text = User.getInstance().inDeviceNo
         binding.outDeviceNo.text = User.getInstance().outDeviceNo
@@ -232,9 +258,13 @@ class InfoManageActivity : BaseActivity() {
     /*
     * 退出登录的相应处理，应有下线请求、数据清除、跳转至登录
     * */
-    private fun signOut() = CoroutineScope(Dispatchers.IO).launch {
-        getOffline(User.getInstance().inDeviceNo)
-        getOffline(User.getInstance().outDeviceNo)
+    private suspend fun signOut() = withContext(Dispatchers.IO) {
+        try {
+            getOffline(User.getInstance().inDeviceNo)
+            getOffline(User.getInstance().outDeviceNo)
+        } catch (e: IllegalArgumentException) {
+            e.printStackTrace()
+        }
         clearData()
         startActivity(Intent(baseContext, MainActivity::class.java))
         finish()

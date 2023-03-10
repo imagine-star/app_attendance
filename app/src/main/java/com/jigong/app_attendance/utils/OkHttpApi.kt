@@ -1,5 +1,6 @@
 package com.jigong.app_attendance.utils
 
+import android.annotation.SuppressLint
 import com.alibaba.fastjson.JSON
 import com.jigong.app_attendance.info.PublicTopicAddress
 import com.jigong.app_attendance.info.User
@@ -62,6 +63,7 @@ fun doPost() {
         })
 }
 
+@SuppressLint("HardwareIds")
 fun doPostJson(url: String, params: Map<String, Any>): String {
     val targetUrl = PublicTopicAddress.HTTP_SERVER + url
     val jsonData = JSON.toJSON(params)
@@ -73,6 +75,7 @@ fun doPostJson(url: String, params: Map<String, Any>): String {
     //创建request请求对象
     val request = Request.Builder()
         .addHeader("token", User.getInstance().token)
+        .addHeader("sn", android.os.Build.SERIAL)
         .url(targetUrl)
         .post(requestBody)
         .build()

@@ -1,5 +1,6 @@
 package com.jigong.app_attendance;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -18,6 +19,7 @@ import com.jigong.app_attendance.utils.OkHttpApiKt;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,6 +27,7 @@ public class MainActivity extends BaseActivity {
 
     private ActivityMainBinding binding;
 
+    @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -37,10 +40,29 @@ public class MainActivity extends BaseActivity {
             startActivity(new Intent(MainActivity.this, InfoManageActivity.class));
             finish();
         } else {
-            binding.passWard.setText("c8d852733a964d0ab99543be23e93dcf");
+            binding.passWard.setText("13aa970548784c1086e293d6e9eb57aa");
             binding.login.setOnClickListener(view1 -> {
                 binding.login.setOnClickListener(null);
-                loadData();
+
+                String userName = "jigong";
+                String passWord = "XmcXQNjTUNq@RqN7";
+                String account = binding.userName.getText().toString().trim();
+                String projectId = binding.passWard.getText().toString().trim();
+                String projectName = "测试";
+
+                User.getInstance().setUserName(userName);
+                User.getInstance().setPassWord(passWord);
+                User.getInstance().setAccount(account);
+                User.getInstance().setProjectId(projectId);
+                User.getInstance().setProjectName(projectName);
+                User.getInstance().setToken("1f52d9de3b6a440e870d7d895045a849");
+                User.getInstance().setInDeviceNo("1738381");//进场设备sn
+                User.getInstance().setOutDeviceNo("2178279");//出场设备sn
+
+                startActivity(new Intent(MainActivity.this, InfoManageActivity.class));
+                finish();
+
+//                loadData();
             });
         }
     }
@@ -65,7 +87,7 @@ public class MainActivity extends BaseActivity {
             protected String doInBackground(Void... voids) {
                 Map<String, Object> map = new HashMap<>();
                 map.put("joinCity", binding.userName.getText().toString().trim());
-                map.put("projectId", binding.passWard.getText().toString().trim());
+                map.put("secret", "1" + binding.passWard.getText().toString().trim() + new Date().getTime());
                 map.put("sn", getDeviceSN());
                 return OkHttpApiKt.doPostJson(PublicTopicAddress.LOGIN, map);
             }
@@ -93,9 +115,9 @@ public class MainActivity extends BaseActivity {
                             User.getInstance().setAccount(account);
                             User.getInstance().setProjectId(projectId);
                             User.getInstance().setProjectName(projectName);
-                            User.getInstance().setToken(token);
-                            User.getInstance().setInDeviceNo("JG0" + projectId.substring(0, 9).toUpperCase() + "0");//进场设备sn
-                            User.getInstance().setOutDeviceNo("JG0" + projectId.substring(0, 9).toUpperCase() + "1");//出场设备sn
+                            User.getInstance().setToken("1f52d9de3b6a440e870d7d895045a849");
+                            User.getInstance().setInDeviceNo("1738381");//进场设备sn
+                            User.getInstance().setOutDeviceNo("2178279");//出场设备sn
 
                             startActivity(new Intent(MainActivity.this, InfoManageActivity.class));
                             finish();

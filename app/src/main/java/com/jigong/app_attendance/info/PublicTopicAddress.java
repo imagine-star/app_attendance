@@ -7,6 +7,9 @@ package com.jigong.app_attendance.info;
  */
 public class PublicTopicAddress {
 
+    public static final String HOST = "120.25.236.103";
+    public static final int PORT = 30028;
+
     /*
      * 济工网平台请求前缀
      * */

@@ -1,8 +1,11 @@
 package com.jigong.app_attendance.hefei
 
+import android.content.Context
 import android.content.Intent
-import android.os.*
+import android.os.Bundle
+import android.text.TextUtils
 import androidx.lifecycle.lifecycleScope
+import cn.hutool.socket.nio.NioClient
 import com.jigong.app_attendance.BaseActivity
 import com.jigong.app_attendance.MainActivity
 import com.jigong.app_attendance.MyApplication
@@ -10,16 +13,20 @@ import com.jigong.app_attendance.bean.AttendanceInfo
 import com.jigong.app_attendance.databinding.ActivityInfoManageBinding
 import com.jigong.app_attendance.info.PublicTopicAddress
 import com.jigong.app_attendance.info.User
+import com.jigong.app_attendance.socket.BaseSocket
 import com.jigong.app_attendance.utils.JsonUtils
 import com.jigong.app_attendance.utils.checkLogin
 import com.jigong.app_attendance.utils.checkResult
 import com.jigong.app_attendance.utils.doPostJson
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.json.JSONObject
-import java.io.EOFException
+import java.io.*
 import java.net.SocketException
-import java.util.Timer
-import java.util.TimerTask
+import java.util.*
+
 
 class InfoManageActivity : BaseActivity() {
 
@@ -29,69 +36,229 @@ class InfoManageActivity : BaseActivity() {
     private val workerInfoDao = MyApplication.getApplication().daoSession.workerInfoDao
     private val attendanceInfoDao = MyApplication.getApplication().daoSession.attendanceInfoDao
 
+    private var nioClientIn: NioClient? = null
+    private var nioClientOut: NioClient? = null
+
+    private val time3: Long = 1000 * 60 * 3
+    private val time5: Long = 1000 * 60 * 5
+    private val time30: Long = 1000 * 60 * 30
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityInfoManageBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)
         initView()
+        if (TextUtils.isEmpty(User.getInstance().token)) {
+            showToastMsgShort("该项目密钥未完善! projectId=" + User.getInstance().projectId + ", projectName=" + User.getInstance().projectName)
+            return
+        }
         lifecycleScope.launch {
-            getOnline(User.getInstance().inDeviceNo)
-            getOnline(User.getInstance().outDeviceNo)
-            while (true) {
-                if (User.getInstance().inOnline && User.getInstance().outOnline) {
-                    println("平台上线请求成功")
-                    println("平台上线结束，开始对济工网平台进行数据处理")
-                    launch(Dispatchers.Main) {
-                        binding.connectStatus.text = "连接成功"
+            try {
+                while (true) {
+                    try {
+                        var client = async(Dispatchers.IO) {
+                            login(User.getInstance().inDeviceNo)
+                        }
+                        nioClientIn = client.await()
+                        client = async(Dispatchers.IO) {
+                            login(User.getInstance().outDeviceNo)
+                        }
+                        nioClientOut = client.await()
+                    } catch (e: Exception) {
+                        e.printStackTrace()
                     }
-                    break
+                    if (nioClientIn != null && nioClientOut != null) {
+                        println("平台上线请求成功")
+                        println("平台上线结束，开始对济工网平台进行数据处理")
+                        launch(Dispatchers.Main) {
+                            binding.connectStatus.text = "连接成功"
+                        }
+                        break
+                    }
+                }
+                /*
+                * 像平台发送心跳，5分钟左右一次
+                * */
+                Timer().schedule(object : TimerTask() {
+                    override fun run() {
+                        if (isFinishing) {
+                            cancel()
+                            return
+                        }
+                        lifecycleScope.launch(Dispatchers.IO) {
+                            try {
+                                if (nioClientIn != null) {
+                                    BaseSocket.sendHeartInfo(nioClientIn)
+                                }
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                            }
+                            try {
+                                if (nioClientOut != null) {
+                                    BaseSocket.sendHeartInfo(nioClientOut)
+                                }
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                            }
+                        }
+                    }
+                }, 0, time5)
+                /*
+                * 获取工人信息，3分钟左右一次
+                * */
+                Timer().schedule(object : TimerTask() {
+                    override fun run() {
+                        if (isFinishing) {
+                            cancel()
+                            return
+                        }
+                        lifecycleScope.launch(Dispatchers.IO) {
+                            try {
+                                //获取人员特征信息
+                                if (nioClientIn != null) {
+                                    BaseSocket.getWorkerCode2(nioClientIn)
+                                }
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                            }
+                        }
+                    }
+                }, 0, time30)
+                /*
+                * 向济工网平台上传工人信息（工人信息表不为空时调用），三分钟左右一次
+                * */
+                Timer().schedule(object : TimerTask() {
+                    override fun run() {
+                        if (isFinishing) {
+                            cancel()
+                            return
+                        }
+                        if (workerInfoDao.queryBuilder().count() > 0) {
+                            lifecycleScope.launch {
+                                pushWorkerInfo()
+                            }
+                        }
+                    }
+                }, 0, time3)
+                /*
+                * 向济工网平台获取工人考勤信息，三分钟左右一次
+                * */
+                Timer().schedule(object : TimerTask() {
+                    override fun run() {
+                        if (isFinishing) {
+                            cancel()
+                            return
+                        }
+                        lifecycleScope.launch {
+                            getWorkerAttendance()
+                        }
+                    }
+                }, 0, time3)
+                /*
+                * 获取工人信息，3分钟左右一次
+                * */
+                Timer().schedule(object : TimerTask() {
+                    override fun run() {
+                        if (isFinishing) {
+                            cancel()
+                            return
+                        }
+                        lifecycleScope.launch(Dispatchers.IO) {
+                            try {
+                                //考勤上传
+                                if (attendanceInfoDao.queryBuilder().count() > 0) {
+                                    if (nioClientIn != null && nioClientOut != null) {
+                                        uploadAttendanceList(nioClientIn, nioClientOut)
+                                    }
+                                }
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                            }
+                        }
+                    }
+                }, 0, time3)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    private fun login(deviceNo: String): NioClient {
+        val stringObjectMap = BaseSocket.doLoginandHeartbeat2(
+            User.getInstance().token,
+            deviceNo
+        )
+        val login = stringObjectMap["flag"] as Boolean?
+        val client = stringObjectMap["client"]
+        if (!login!!) {
+            showToastMsgShort("设备登录失败! projectId=" + User.getInstance().projectId + ", projectName=" + User.getInstance().projectName)
+        }
+        return client as NioClient
+    }
+
+    fun uploadAttendanceList(clientIn: NioClient?, clientOut: NioClient?) {
+        val attendanceList = if (attendanceInfoDao.count() > limitCount) {
+            attendanceInfoDao.queryBuilder().limit(limitCount).list()
+        } else {
+            attendanceInfoDao.loadAll()
+        }
+        attendanceList.forEach {
+            val workerCode: String = it.workerCode
+            val date: String = com.jigong.app_attendance.utils.DateUtils.date2Str(
+                com.jigong.app_attendance.utils.DateUtils.str2Date(
+                    it.checkinTime,
+                    "yyyy-MM-dd HH:mm:ss"
+                ), "yyyyMMddHHmmss"
+            )
+            val imageToByte =
+                getImageBytes(it.normalSignImage)
+            if (TextUtils.isEmpty(workerCode)) {
+                println("工人编号未下拉")
+            }
+            if (TextUtils.isEmpty(it.normalSignImage)) {
+                println("考勤图片未完善")
+            }
+            try {
+                val booleanStringMap =
+                    BaseSocket.sendAttendance(
+                        workerCode,
+                        date,
+                        imageToByte,
+                        if (it.machineType.equals("02")) clientIn else clientOut
+                    )
+                if (booleanStringMap.isEmpty() || booleanStringMap.containsKey(false)) {
+                    println("人员考勤上传失败, 平台返回:" + booleanStringMap[false])
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    fun getImageBytes(filePath: String?): ByteArray? {
+        try {
+            val file = File(filePath)
+            var inputStream: FileInputStream? = null
+            try {
+                inputStream = FileInputStream(file)
+                val byteData = ByteArray(inputStream.available())
+                inputStream.read(byteData, 0, byteData.size)
+                inputStream.close()
+                return byteData
+            } catch (e: IOException) {
+                e.printStackTrace()
+            } finally {
+                try {
+                    inputStream!!.close()
+                } catch (e: IOException) {
+                    e.printStackTrace()
                 }
             }
-            /*
-            * 向济工网平台上传工人信息（工人信息表不为空时调用），三分钟左右一次
-            * */
-            Timer().schedule(object : TimerTask() {
-                override fun run() {
-                    if (isFinishing) {
-                        cancel()
-                    }
-                    if (workerInfoDao.queryBuilder().count() > 0) {
-                        lifecycleScope.launch {
-                            pushWorkerInfo()
-                        }
-                    }
-                }
-            }, 0, 30 * 1000)
-            /*
-            * 向济工网平台获取工人考勤信息，三分钟左右一次
-            * */
-            Timer().schedule(object : TimerTask() {
-                override fun run() {
-                    if (isFinishing) {
-                        cancel()
-                    }
-                    lifecycleScope.launch {
-                        getWorkerAttendance()
-                    }
-                }
-            }, 0, 30 * 1000)
-            /*
-            * 向合肥平台推送工人考勤信息（考勤信息表不为空时调用），三分钟左右一次
-            * */
-            Timer().schedule(object : TimerTask() {
-                override fun run() {
-                    if (isFinishing) {
-                        cancel()
-                    }
-                    if (attendanceInfoDao.queryBuilder().count() > 0) {
-                        lifecycleScope.launch {
-                            pushWorkerAttendance()
-                        }
-                    }
-                }
-            }, 0, 30 * 1000)
+        } catch (e: IOException) {
+            e.printStackTrace()
         }
+        return null
     }
 
     private suspend fun pushWorkerAttendance() = withContext(Dispatchers.IO) {
@@ -169,6 +336,8 @@ class InfoManageActivity : BaseActivity() {
                                 JsonUtils.getJsonValue(dataObject, "temperature", "")
                             attendanceInfo.workerId =
                                 JsonUtils.getJsonValue(dataObject, "workerId", "")
+                            attendanceInfo.workerCode =
+                                JsonUtils.getJsonValue(dataObject, "workerCode", "")
                             attendanceInfo.workerName =
                                 JsonUtils.getJsonValue(dataObject, "workerName", "")
                             attendanceInfo.idNumber =

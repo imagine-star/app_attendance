@@ -26,13 +26,16 @@ public class WorkerInfoDao extends AbstractDao<WorkerInfo, Long> {
     public static class Properties {
         public final static Property Id = new Property(0, Long.class, "id", true, "_id");
         public final static Property CustomId = new Property(1, String.class, "customId", false, "CUSTOM_ID");
-        public final static Property Name = new Property(2, String.class, "name", false, "NAME");
-        public final static Property PersonType = new Property(3, String.class, "personType", false, "PERSON_TYPE");
-        public final static Property Gender = new Property(4, String.class, "gender", false, "GENDER");
-        public final static Property IdCard = new Property(5, String.class, "idCard", false, "ID_CARD");
-        public final static Property CardType = new Property(6, String.class, "cardType", false, "CARD_TYPE");
-        public final static Property Birthday = new Property(7, String.class, "birthday", false, "BIRTHDAY");
-        public final static Property PicURI = new Property(8, String.class, "picURI", false, "PIC_URI");
+        public final static Property WorkerId = new Property(2, String.class, "workerId", false, "WORKER_ID");
+        public final static Property WorkerCode = new Property(3, String.class, "workerCode", false, "WORKER_CODE");
+        public final static Property Name = new Property(4, String.class, "name", false, "NAME");
+        public final static Property IdNumber = new Property(5, String.class, "idNumber", false, "ID_NUMBER");
+        public final static Property PersonType = new Property(6, String.class, "personType", false, "PERSON_TYPE");
+        public final static Property Gender = new Property(7, String.class, "gender", false, "GENDER");
+        public final static Property IdCard = new Property(8, String.class, "idCard", false, "ID_CARD");
+        public final static Property CardType = new Property(9, String.class, "cardType", false, "CARD_TYPE");
+        public final static Property Birthday = new Property(10, String.class, "birthday", false, "BIRTHDAY");
+        public final static Property PicURI = new Property(11, String.class, "picURI", false, "PIC_URI");
     }
 
 
@@ -50,13 +53,16 @@ public class WorkerInfoDao extends AbstractDao<WorkerInfo, Long> {
         db.execSQL("CREATE TABLE " + constraint + "\"WORKER_INFO\" (" + //
                 "\"_id\" INTEGER PRIMARY KEY ," + // 0: id
                 "\"CUSTOM_ID\" TEXT," + // 1: customId
-                "\"NAME\" TEXT," + // 2: name
-                "\"PERSON_TYPE\" TEXT," + // 3: personType
-                "\"GENDER\" TEXT," + // 4: gender
-                "\"ID_CARD\" TEXT," + // 5: idCard
-                "\"CARD_TYPE\" TEXT," + // 6: cardType
-                "\"BIRTHDAY\" TEXT," + // 7: birthday
-                "\"PIC_URI\" TEXT);"); // 8: picURI
+                "\"WORKER_ID\" TEXT," + // 2: workerId
+                "\"WORKER_CODE\" TEXT," + // 3: workerCode
+                "\"NAME\" TEXT," + // 4: name
+                "\"ID_NUMBER\" TEXT," + // 5: idNumber
+                "\"PERSON_TYPE\" TEXT," + // 6: personType
+                "\"GENDER\" TEXT," + // 7: gender
+                "\"ID_CARD\" TEXT," + // 8: idCard
+                "\"CARD_TYPE\" TEXT," + // 9: cardType
+                "\"BIRTHDAY\" TEXT," + // 10: birthday
+                "\"PIC_URI\" TEXT);"); // 11: picURI
     }
 
     /** Drops the underlying database table. */
@@ -79,39 +85,54 @@ public class WorkerInfoDao extends AbstractDao<WorkerInfo, Long> {
             stmt.bindString(2, customId);
         }
  
+        String workerId = entity.getWorkerId();
+        if (workerId != null) {
+            stmt.bindString(3, workerId);
+        }
+ 
+        String workerCode = entity.getWorkerCode();
+        if (workerCode != null) {
+            stmt.bindString(4, workerCode);
+        }
+ 
         String name = entity.getName();
         if (name != null) {
-            stmt.bindString(3, name);
+            stmt.bindString(5, name);
+        }
+ 
+        String idNumber = entity.getIdNumber();
+        if (idNumber != null) {
+            stmt.bindString(6, idNumber);
         }
  
         String personType = entity.getPersonType();
         if (personType != null) {
-            stmt.bindString(4, personType);
+            stmt.bindString(7, personType);
         }
  
         String gender = entity.getGender();
         if (gender != null) {
-            stmt.bindString(5, gender);
+            stmt.bindString(8, gender);
         }
  
         String idCard = entity.getIdCard();
         if (idCard != null) {
-            stmt.bindString(6, idCard);
+            stmt.bindString(9, idCard);
         }
  
         String cardType = entity.getCardType();
         if (cardType != null) {
-            stmt.bindString(7, cardType);
+            stmt.bindString(10, cardType);
         }
  
         String birthday = entity.getBirthday();
         if (birthday != null) {
-            stmt.bindString(8, birthday);
+            stmt.bindString(11, birthday);
         }
  
         String picURI = entity.getPicURI();
         if (picURI != null) {
-            stmt.bindString(9, picURI);
+            stmt.bindString(12, picURI);
         }
     }
 
@@ -129,39 +150,54 @@ public class WorkerInfoDao extends AbstractDao<WorkerInfo, Long> {
             stmt.bindString(2, customId);
         }
  
+        String workerId = entity.getWorkerId();
+        if (workerId != null) {
+            stmt.bindString(3, workerId);
+        }
+ 
+        String workerCode = entity.getWorkerCode();
+        if (workerCode != null) {
+            stmt.bindString(4, workerCode);
+        }
+ 
         String name = entity.getName();
         if (name != null) {
-            stmt.bindString(3, name);
+            stmt.bindString(5, name);
+        }
+ 
+        String idNumber = entity.getIdNumber();
+        if (idNumber != null) {
+            stmt.bindString(6, idNumber);
         }
  
         String personType = entity.getPersonType();
         if (personType != null) {
-            stmt.bindString(4, personType);
+            stmt.bindString(7, personType);
         }
  
         String gender = entity.getGender();
         if (gender != null) {
-            stmt.bindString(5, gender);
+            stmt.bindString(8, gender);
         }
  
         String idCard = entity.getIdCard();
         if (idCard != null) {
-            stmt.bindString(6, idCard);
+            stmt.bindString(9, idCard);
         }
  
         String cardType = entity.getCardType();
         if (cardType != null) {
-            stmt.bindString(7, cardType);
+            stmt.bindString(10, cardType);
         }
  
         String birthday = entity.getBirthday();
         if (birthday != null) {
-            stmt.bindString(8, birthday);
+            stmt.bindString(11, birthday);
         }
  
         String picURI = entity.getPicURI();
         if (picURI != null) {
-            stmt.bindString(9, picURI);
+            stmt.bindString(12, picURI);
         }
     }
 
@@ -175,13 +211,16 @@ public class WorkerInfoDao extends AbstractDao<WorkerInfo, Long> {
         WorkerInfo entity = new WorkerInfo( //
             cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0), // id
             cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1), // customId
-            cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2), // name
-            cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3), // personType
-            cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4), // gender
-            cursor.isNull(offset + 5) ? null : cursor.getString(offset + 5), // idCard
-            cursor.isNull(offset + 6) ? null : cursor.getString(offset + 6), // cardType
-            cursor.isNull(offset + 7) ? null : cursor.getString(offset + 7), // birthday
-            cursor.isNull(offset + 8) ? null : cursor.getString(offset + 8) // picURI
+            cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2), // workerId
+            cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3), // workerCode
+            cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4), // name
+            cursor.isNull(offset + 5) ? null : cursor.getString(offset + 5), // idNumber
+            cursor.isNull(offset + 6) ? null : cursor.getString(offset + 6), // personType
+            cursor.isNull(offset + 7) ? null : cursor.getString(offset + 7), // gender
+            cursor.isNull(offset + 8) ? null : cursor.getString(offset + 8), // idCard
+            cursor.isNull(offset + 9) ? null : cursor.getString(offset + 9), // cardType
+            cursor.isNull(offset + 10) ? null : cursor.getString(offset + 10), // birthday
+            cursor.isNull(offset + 11) ? null : cursor.getString(offset + 11) // picURI
         );
         return entity;
     }
@@ -190,13 +229,16 @@ public class WorkerInfoDao extends AbstractDao<WorkerInfo, Long> {
     public void readEntity(Cursor cursor, WorkerInfo entity, int offset) {
         entity.setId(cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0));
         entity.setCustomId(cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1));
-        entity.setName(cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2));
-        entity.setPersonType(cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3));
-        entity.setGender(cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4));
-        entity.setIdCard(cursor.isNull(offset + 5) ? null : cursor.getString(offset + 5));
-        entity.setCardType(cursor.isNull(offset + 6) ? null : cursor.getString(offset + 6));
-        entity.setBirthday(cursor.isNull(offset + 7) ? null : cursor.getString(offset + 7));
-        entity.setPicURI(cursor.isNull(offset + 8) ? null : cursor.getString(offset + 8));
+        entity.setWorkerId(cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2));
+        entity.setWorkerCode(cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3));
+        entity.setName(cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4));
+        entity.setIdNumber(cursor.isNull(offset + 5) ? null : cursor.getString(offset + 5));
+        entity.setPersonType(cursor.isNull(offset + 6) ? null : cursor.getString(offset + 6));
+        entity.setGender(cursor.isNull(offset + 7) ? null : cursor.getString(offset + 7));
+        entity.setIdCard(cursor.isNull(offset + 8) ? null : cursor.getString(offset + 8));
+        entity.setCardType(cursor.isNull(offset + 9) ? null : cursor.getString(offset + 9));
+        entity.setBirthday(cursor.isNull(offset + 10) ? null : cursor.getString(offset + 10));
+        entity.setPicURI(cursor.isNull(offset + 11) ? null : cursor.getString(offset + 11));
      }
     
     @Override

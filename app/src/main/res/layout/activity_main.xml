@@ -47,7 +47,7 @@
                 android:layout_weight="1"
                 android:background="@color/white"
                 android:hint="请输入登陆账号"
-                android:text="275"
+                android:text="283"
                 android:textColor="@color/black"
                 android:textSize="18sp"/>
 

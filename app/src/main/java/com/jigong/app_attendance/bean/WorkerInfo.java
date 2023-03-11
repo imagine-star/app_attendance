@@ -15,7 +15,10 @@ public class WorkerInfo {
     @Id
     private Long id;
     private String customId;//人员唯一 ID(最长 48 字符), 如果设备存在该id,则为修改操作,否则为新增操作
+    private String workerId;
+    private String workerCode;//佛山平台工人编号
     private String name;//人员姓名(最长 48 字符)
+    private String idNumber;
     private String personType;//人员类型 0: 白名单 1: 黑名单
     private String gender;//人员性别 0: 男 1: 女
     private String idCard;//证件号码(最长 32 字符)
@@ -23,13 +26,16 @@ public class WorkerInfo {
     private String birthday;//(可选)生日: 格式 1960-01-31
     private String picURI;//人员照片 uri 地址
 
-    @Generated(hash = 1327636705)
-    public WorkerInfo(Long id, String customId, String name, String personType,
-            String gender, String idCard, String cardType, String birthday,
-            String picURI) {
+    @Generated(hash = 2115325662)
+    public WorkerInfo(Long id, String customId, String workerId, String workerCode,
+            String name, String idNumber, String personType, String gender,
+            String idCard, String cardType, String birthday, String picURI) {
         this.id = id;
         this.customId = customId;
+        this.workerId = workerId;
+        this.workerCode = workerCode;
         this.name = name;
+        this.idNumber = idNumber;
         this.personType = personType;
         this.gender = gender;
         this.idCard = idCard;
@@ -112,6 +118,30 @@ public class WorkerInfo {
 
     public void setPicURI(String picURI) {
         this.picURI = picURI;
+    }
+
+    public String getWorkerId() {
+        return this.workerId;
+    }
+
+    public void setWorkerId(String workerId) {
+        this.workerId = workerId;
+    }
+
+    public String getIdNumber() {
+        return this.idNumber;
+    }
+
+    public void setIdNumber(String idNumber) {
+        this.idNumber = idNumber;
+    }
+
+    public String getWorkerCode() {
+        return this.workerCode;
+    }
+
+    public void setWorkerCode(String workerCode) {
+        this.workerCode = workerCode;
     }
 
 }

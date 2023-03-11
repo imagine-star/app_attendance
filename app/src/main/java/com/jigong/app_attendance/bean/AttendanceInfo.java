@@ -17,22 +17,23 @@ public class AttendanceInfo {
     private String attendanceId;
     private String checkinTime;
     private String deviceSerialNo;
-    private String machineType;
+    private String machineType;//出入口方向 进:"02" ，出口:"01" ,无方向: "unknown"
     private String normalSignImage;
     private String projectId;
     private String redSignImage;
     private String subcontractorId;
     private String temperature;
     private String workerId;
+    private String workerCode;
     private String workerName;
     private String idNumber;
 
-    @Generated(hash = 580934522)
+    @Generated(hash = 1226497033)
     public AttendanceInfo(Long id, String attendanceId, String checkinTime,
             String deviceSerialNo, String machineType, String normalSignImage,
             String projectId, String redSignImage, String subcontractorId,
-            String temperature, String workerId, String workerName,
-            String idNumber) {
+            String temperature, String workerId, String workerCode,
+            String workerName, String idNumber) {
         this.id = id;
         this.attendanceId = attendanceId;
         this.checkinTime = checkinTime;
@@ -44,6 +45,7 @@ public class AttendanceInfo {
         this.subcontractorId = subcontractorId;
         this.temperature = temperature;
         this.workerId = workerId;
+        this.workerCode = workerCode;
         this.workerName = workerName;
         this.idNumber = idNumber;
     }
@@ -154,6 +156,14 @@ public class AttendanceInfo {
 
     public void setCheckinTime(String checkinTime) {
         this.checkinTime = checkinTime;
+    }
+
+    public String getWorkerCode() {
+        return this.workerCode;
+    }
+
+    public void setWorkerCode(String workerCode) {
+        this.workerCode = workerCode;
     }
 
 }

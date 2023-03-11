@@ -35,8 +35,9 @@ public class AttendanceInfoDao extends AbstractDao<AttendanceInfo, Long> {
         public final static Property SubcontractorId = new Property(8, String.class, "subcontractorId", false, "SUBCONTRACTOR_ID");
         public final static Property Temperature = new Property(9, String.class, "temperature", false, "TEMPERATURE");
         public final static Property WorkerId = new Property(10, String.class, "workerId", false, "WORKER_ID");
-        public final static Property WorkerName = new Property(11, String.class, "workerName", false, "WORKER_NAME");
-        public final static Property IdNumber = new Property(12, String.class, "idNumber", false, "ID_NUMBER");
+        public final static Property WorkerCode = new Property(11, String.class, "workerCode", false, "WORKER_CODE");
+        public final static Property WorkerName = new Property(12, String.class, "workerName", false, "WORKER_NAME");
+        public final static Property IdNumber = new Property(13, String.class, "idNumber", false, "ID_NUMBER");
     }
 
 
@@ -63,8 +64,9 @@ public class AttendanceInfoDao extends AbstractDao<AttendanceInfo, Long> {
                 "\"SUBCONTRACTOR_ID\" TEXT," + // 8: subcontractorId
                 "\"TEMPERATURE\" TEXT," + // 9: temperature
                 "\"WORKER_ID\" TEXT," + // 10: workerId
-                "\"WORKER_NAME\" TEXT," + // 11: workerName
-                "\"ID_NUMBER\" TEXT);"); // 12: idNumber
+                "\"WORKER_CODE\" TEXT," + // 11: workerCode
+                "\"WORKER_NAME\" TEXT," + // 12: workerName
+                "\"ID_NUMBER\" TEXT);"); // 13: idNumber
     }
 
     /** Drops the underlying database table. */
@@ -132,14 +134,19 @@ public class AttendanceInfoDao extends AbstractDao<AttendanceInfo, Long> {
             stmt.bindString(11, workerId);
         }
  
+        String workerCode = entity.getWorkerCode();
+        if (workerCode != null) {
+            stmt.bindString(12, workerCode);
+        }
+ 
         String workerName = entity.getWorkerName();
         if (workerName != null) {
-            stmt.bindString(12, workerName);
+            stmt.bindString(13, workerName);
         }
  
         String idNumber = entity.getIdNumber();
         if (idNumber != null) {
-            stmt.bindString(13, idNumber);
+            stmt.bindString(14, idNumber);
         }
     }
 
@@ -202,14 +209,19 @@ public class AttendanceInfoDao extends AbstractDao<AttendanceInfo, Long> {
             stmt.bindString(11, workerId);
         }
  
+        String workerCode = entity.getWorkerCode();
+        if (workerCode != null) {
+            stmt.bindString(12, workerCode);
+        }
+ 
         String workerName = entity.getWorkerName();
         if (workerName != null) {
-            stmt.bindString(12, workerName);
+            stmt.bindString(13, workerName);
         }
  
         String idNumber = entity.getIdNumber();
         if (idNumber != null) {
-            stmt.bindString(13, idNumber);
+            stmt.bindString(14, idNumber);
         }
     }
 
@@ -232,8 +244,9 @@ public class AttendanceInfoDao extends AbstractDao<AttendanceInfo, Long> {
             cursor.isNull(offset + 8) ? null : cursor.getString(offset + 8), // subcontractorId
             cursor.isNull(offset + 9) ? null : cursor.getString(offset + 9), // temperature
             cursor.isNull(offset + 10) ? null : cursor.getString(offset + 10), // workerId
-            cursor.isNull(offset + 11) ? null : cursor.getString(offset + 11), // workerName
-            cursor.isNull(offset + 12) ? null : cursor.getString(offset + 12) // idNumber
+            cursor.isNull(offset + 11) ? null : cursor.getString(offset + 11), // workerCode
+            cursor.isNull(offset + 12) ? null : cursor.getString(offset + 12), // workerName
+            cursor.isNull(offset + 13) ? null : cursor.getString(offset + 13) // idNumber
         );
         return entity;
     }
@@ -251,8 +264,9 @@ public class AttendanceInfoDao extends AbstractDao<AttendanceInfo, Long> {
         entity.setSubcontractorId(cursor.isNull(offset + 8) ? null : cursor.getString(offset + 8));
         entity.setTemperature(cursor.isNull(offset + 9) ? null : cursor.getString(offset + 9));
         entity.setWorkerId(cursor.isNull(offset + 10) ? null : cursor.getString(offset + 10));
-        entity.setWorkerName(cursor.isNull(offset + 11) ? null : cursor.getString(offset + 11));
-        entity.setIdNumber(cursor.isNull(offset + 12) ? null : cursor.getString(offset + 12));
+        entity.setWorkerCode(cursor.isNull(offset + 11) ? null : cursor.getString(offset + 11));
+        entity.setWorkerName(cursor.isNull(offset + 12) ? null : cursor.getString(offset + 12));
+        entity.setIdNumber(cursor.isNull(offset + 13) ? null : cursor.getString(offset + 13));
      }
     
     @Override

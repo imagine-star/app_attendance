@@ -8,7 +8,9 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.Toast;
 
+import com.jigong.app_attendance.bean.WorkerInfo;
 import com.jigong.app_attendance.databinding.ActivityMainBinding;
+import com.jigong.app_attendance.greendao.WorkerInfoDao;
 import com.jigong.app_attendance.hefei.InfoManageActivity;
 import com.jigong.app_attendance.info.PublicTopicAddress;
 import com.jigong.app_attendance.info.User;
@@ -19,9 +21,12 @@ import com.jigong.app_attendance.utils.OkHttpApiKt;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+
+import cn.hutool.core.util.HexUtil;
 
 public class MainActivity extends BaseActivity {
 
@@ -40,29 +45,10 @@ public class MainActivity extends BaseActivity {
             startActivity(new Intent(MainActivity.this, InfoManageActivity.class));
             finish();
         } else {
-            binding.passWard.setText("13aa970548784c1086e293d6e9eb57aa");
+//            binding.passWard.setText("af5d144ab54d484db71da55dbedf593c");
             binding.login.setOnClickListener(view1 -> {
                 binding.login.setOnClickListener(null);
-
-                String userName = "jigong";
-                String passWord = "XmcXQNjTUNq@RqN7";
-                String account = binding.userName.getText().toString().trim();
-                String projectId = binding.passWard.getText().toString().trim();
-                String projectName = "测试";
-
-                User.getInstance().setUserName(userName);
-                User.getInstance().setPassWord(passWord);
-                User.getInstance().setAccount(account);
-                User.getInstance().setProjectId(projectId);
-                User.getInstance().setProjectName(projectName);
-                User.getInstance().setToken("1f52d9de3b6a440e870d7d895045a849");
-                User.getInstance().setInDeviceNo("1738381");//进场设备sn
-                User.getInstance().setOutDeviceNo("2178279");//出场设备sn
-
-                startActivity(new Intent(MainActivity.this, InfoManageActivity.class));
-                finish();
-
-//                loadData();
+                loadData();
             });
         }
     }
@@ -89,7 +75,7 @@ public class MainActivity extends BaseActivity {
                 map.put("joinCity", binding.userName.getText().toString().trim());
                 map.put("secret", "1" + binding.passWard.getText().toString().trim() + new Date().getTime());
                 map.put("sn", getDeviceSN());
-                return OkHttpApiKt.doPostJson(PublicTopicAddress.LOGIN, map);
+                return OkHttpApiKt.doPostJson(PublicTopicAddress.LOGIN_FOSHAN, map);
             }
 
             @Override
@@ -103,21 +89,21 @@ public class MainActivity extends BaseActivity {
                         if (CheckUtilsKt.checkResult(result)) {
                             User.getInstance().setLogin(true);
                             JSONObject dataObject = JsonUtils.getJSONObject(entry, "result");
-                            String userName = "jigong";
-                            String passWord = "XmcXQNjTUNq@RqN7";
+//                            String userName = "jigong";
+//                            String passWord = "XmcXQNjTUNq@RqN7";
                             String account = binding.userName.getText().toString().trim();
-                            String projectId = binding.passWard.getText().toString().trim();
+                            String projectId = JsonUtils.getJsonValue(dataObject, "projectId", "");
                             String projectName = JsonUtils.getJsonValue(dataObject, "projectName", "");
-                            String token = JsonUtils.getJsonValue(dataObject, "token", "");
+                            String token = JsonUtils.getJsonValue(dataObject, "joinCode", "");
 
-                            User.getInstance().setUserName(userName);
-                            User.getInstance().setPassWord(passWord);
+//                            User.getInstance().setUserName(userName);
+//                            User.getInstance().setPassWord(passWord);
                             User.getInstance().setAccount(account);
                             User.getInstance().setProjectId(projectId);
                             User.getInstance().setProjectName(projectName);
-                            User.getInstance().setToken("1f52d9de3b6a440e870d7d895045a849");
-                            User.getInstance().setInDeviceNo("1738381");//进场设备sn
-                            User.getInstance().setOutDeviceNo("2178279");//出场设备sn
+                            User.getInstance().setToken(token);
+                            User.getInstance().setInDeviceNo(projectId);//进场设备sn
+                            User.getInstance().setOutDeviceNo(projectId.substring(0, 8) + "1");//出场设备sn
 
                             startActivity(new Intent(MainActivity.this, InfoManageActivity.class));
                             finish();

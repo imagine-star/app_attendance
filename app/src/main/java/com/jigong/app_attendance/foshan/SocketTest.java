@@ -1,4 +1,4 @@
-package com.jigong.app_attendance.socket;
+package com.jigong.app_attendance.foshan;
 
 
 import com.jigong.app_attendance.info.PublicTopicAddress;
@@ -114,23 +114,23 @@ public class SocketTest {
                         String t = rootResult;
                         String cmd = t.substring(28, 32);
                         if ("4B03".equals(cmd)) {
-//                            logger.info("接收到设备登录返回数据" + rootResult);
+                            System.out.println("接收到设备登录返回数据" + rootResult);
                             int lenth = Integer.parseInt(HexUtil.reverseString(rootResult.substring(2, 10)), 16);
                             String resultContent = rootResult.substring(64, 64 + (lenth) * 2);
                             String code = rootResult.substring(rootResult.length() - 4, rootResult.length() - 2);
                             if ("00".equals(code)) {
-//                                logger.info("设备登陆成功！");
+                                System.out.println("设备登陆成功！");
                                 flag = true;
                                 map.put("flag", flag);
                             } else {
-//                                logger.info("设备登陆失败！" + "原因是：" + HexUtil.hexStringToString(resultContent));
+                                System.out.println("设备登陆失败！" + "原因是：" + HexUtil.hexStringToString(resultContent));
                                 map.put("flag", flag);
                             }
                         }
                         break;
                     }
                     if (count % 5 == 0) {
-//                        logger.info("无返回值");
+                        System.out.println("设备登陆无返回值");
                         break;
                     }
                     //Thread.sleep(1000);

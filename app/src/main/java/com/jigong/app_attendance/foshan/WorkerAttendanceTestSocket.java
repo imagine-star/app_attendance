@@ -1,4 +1,4 @@
-package com.jigong.app_attendance.socket;
+package com.jigong.app_attendance.foshan;
 
 import android.text.TextUtils;
 
@@ -52,7 +52,7 @@ public class WorkerAttendanceTestSocket {
                     break;
                 }
                 if(count%5==0) {
-                    System.out.println("无返回值");
+                    System.out.println("上传人员考勤信息无返回值");
                     break;
                 }
                 //Thread.sleep(1000);

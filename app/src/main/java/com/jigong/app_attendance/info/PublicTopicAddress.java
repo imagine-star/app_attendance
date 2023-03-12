@@ -7,14 +7,14 @@ package com.jigong.app_attendance.info;
  */
 public class PublicTopicAddress {
 
-    public static final String HOST = "120.25.236.103";
-    public static final int PORT = 30028;
+    public static final String HOST = "219.130.221.10";
+    public static final int PORT = 20028;
 
     /*
      * 济工网平台请求前缀
      * */
-//    public static String SERVER = "http://sign.gongyoumishu.com/";
-    public static String SERVER = "http://139.196.157.209:9001/";
+    public static String SERVER = "http://sign.gongyoumishu.com/";
+//    public static String SERVER = "http://192.168.3.139:9001/";
 
     public static String GOMEET = "gomeetsign/";
 
@@ -23,17 +23,17 @@ public class PublicTopicAddress {
     /*
      *济工网平台登录
      * */
-    public static String LOGIN = "webapi/handPad/platform/login/v1";
+    public static String LOGIN_FOSHAN = "webapi/handPad/platform/noProjectlogin/v1";
 
     /*
      *济工网平台上传工人信息
      * */
-    public static String UPLOAD_WORKER = "api/worker/uploadWorker/v1";
+    public static String UPLOAD_WORKER_FOSHAN = "api/worker/uploadWorker/v1";
 
     /*
      *项目考勤查询
      * */
-    public static String QUERY_PROJECT_SIGN_LIST = "api/sign/queryProjectSignList/v1";
+    public static String QUERY_PROJECT_SIGN_LIST_FOSHAN = "api/sign/queryProjectSignList/v1";
 
     /*
      * 合肥平台指令前缀

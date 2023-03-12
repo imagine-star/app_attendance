@@ -24,12 +24,13 @@ public class WorkerInfo {
     private String idCard;//证件号码(最长 32 字符)
     private String cardType;//(可选)证件类型：0 身份证
     private String birthday;//(可选)生日: 格式 1960-01-31
-    private String picURI;//人员照片 uri 地址
+    private byte[] picURI;//人员照片 uri 地址
+    private boolean getInfo = false;//是否从平台获取到了工人信息，false未获取到，true已获取到
 
-    @Generated(hash = 2115325662)
+    @Generated(hash = 35714920)
     public WorkerInfo(Long id, String customId, String workerId, String workerCode,
-            String name, String idNumber, String personType, String gender,
-            String idCard, String cardType, String birthday, String picURI) {
+            String name, String idNumber, String personType, String gender, String idCard,
+            String cardType, String birthday, byte[] picURI, boolean getInfo) {
         this.id = id;
         this.customId = customId;
         this.workerId = workerId;
@@ -42,6 +43,7 @@ public class WorkerInfo {
         this.cardType = cardType;
         this.birthday = birthday;
         this.picURI = picURI;
+        this.getInfo = getInfo;
     }
 
     @Generated(hash = 1000580303)
@@ -64,12 +66,36 @@ public class WorkerInfo {
         this.customId = customId;
     }
 
+    public String getWorkerId() {
+        return this.workerId;
+    }
+
+    public void setWorkerId(String workerId) {
+        this.workerId = workerId;
+    }
+
+    public String getWorkerCode() {
+        return this.workerCode;
+    }
+
+    public void setWorkerCode(String workerCode) {
+        this.workerCode = workerCode;
+    }
+
     public String getName() {
         return this.name;
     }
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getIdNumber() {
+        return this.idNumber;
+    }
+
+    public void setIdNumber(String idNumber) {
+        this.idNumber = idNumber;
     }
 
     public String getPersonType() {
@@ -112,36 +138,20 @@ public class WorkerInfo {
         this.birthday = birthday;
     }
 
-    public String getPicURI() {
+    public byte[] getPicURI() {
         return this.picURI;
     }
 
-    public void setPicURI(String picURI) {
+    public void setPicURI(byte[] picURI) {
         this.picURI = picURI;
     }
 
-    public String getWorkerId() {
-        return this.workerId;
+    public boolean getGetInfo() {
+        return this.getInfo;
     }
 
-    public void setWorkerId(String workerId) {
-        this.workerId = workerId;
-    }
-
-    public String getIdNumber() {
-        return this.idNumber;
-    }
-
-    public void setIdNumber(String idNumber) {
-        this.idNumber = idNumber;
-    }
-
-    public String getWorkerCode() {
-        return this.workerCode;
-    }
-
-    public void setWorkerCode(String workerCode) {
-        this.workerCode = workerCode;
+    public void setGetInfo(boolean getInfo) {
+        this.getInfo = getInfo;
     }
 
 }

@@ -21,10 +21,19 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.App_attendance"
         android:usesCleartextTraffic="true">
-        <activity android:name=".hefei.InfoManageActivity"
+        <activity
+            android:name=".ShowNoInfoWorkerActivity"
+            android:exported="false">
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="" />
+        </activity>
+        <activity
+            android:name=".hefei.InfoManageActivity"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity" />
-        <activity android:name=".BaseActivity"
+        <activity
+            android:name=".BaseActivity"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity" />
         <activity
@@ -37,6 +46,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".foshan.ShowNoInfoWorkerActivity" />
 
         <service android:name="org.eclipse.paho.android.service.MqttService" />
     </application>

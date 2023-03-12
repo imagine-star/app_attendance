@@ -1,6 +1,5 @@
 package com.jigong.app_attendance.hefei
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.text.TextUtils
@@ -11,9 +10,11 @@ import com.jigong.app_attendance.MainActivity
 import com.jigong.app_attendance.MyApplication
 import com.jigong.app_attendance.bean.AttendanceInfo
 import com.jigong.app_attendance.databinding.ActivityInfoManageBinding
+import com.jigong.app_attendance.foshan.BaseSocket
+import com.jigong.app_attendance.foshan.ShowNoInfoWorkerActivity
+import com.jigong.app_attendance.foshan.WorkerInfoSocket
 import com.jigong.app_attendance.info.PublicTopicAddress
 import com.jigong.app_attendance.info.User
-import com.jigong.app_attendance.socket.BaseSocket
 import com.jigong.app_attendance.utils.JsonUtils
 import com.jigong.app_attendance.utils.checkLogin
 import com.jigong.app_attendance.utils.checkResult
@@ -41,7 +42,7 @@ class InfoManageActivity : BaseActivity() {
 
     private val time3: Long = 1000 * 60 * 3
     private val time5: Long = 1000 * 60 * 5
-    private val time30: Long = 1000 * 60 * 30
+    private val time30: Long = 1000 * 60 * 60
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,18 +54,22 @@ class InfoManageActivity : BaseActivity() {
             showToastMsgShort("该项目密钥未完善! projectId=" + User.getInstance().projectId + ", projectName=" + User.getInstance().projectName)
             return
         }
+        binding.managerTitle.setOnClickListener {
+            val intent = Intent(this, ShowNoInfoWorkerActivity::class.java)
+            startActivity(intent)
+        }
         lifecycleScope.launch {
             try {
                 while (true) {
                     try {
-                        var client = async(Dispatchers.IO) {
+                        val client = async(Dispatchers.IO) {
                             login(User.getInstance().inDeviceNo)
                         }
                         nioClientIn = client.await()
-                        client = async(Dispatchers.IO) {
+                        val clientOut = async(Dispatchers.IO) {
                             login(User.getInstance().outDeviceNo)
                         }
-                        nioClientOut = client.await()
+                        nioClientOut = clientOut.await()
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }
@@ -135,8 +140,9 @@ class InfoManageActivity : BaseActivity() {
                             return
                         }
                         if (workerInfoDao.queryBuilder().count() > 0) {
+                            val workerList = workerInfoDao.queryBuilder().list();
                             lifecycleScope.launch {
-                                pushWorkerInfo()
+//                                pushWorkerInfo()
                             }
                         }
                     }
@@ -151,7 +157,7 @@ class InfoManageActivity : BaseActivity() {
                             return
                         }
                         lifecycleScope.launch {
-                            getWorkerAttendance()
+//                            getWorkerAttendance()
                         }
                     }
                 }, 0, time3)
@@ -229,6 +235,8 @@ class InfoManageActivity : BaseActivity() {
                     )
                 if (booleanStringMap.isEmpty() || booleanStringMap.containsKey(false)) {
                     println("人员考勤上传失败, 平台返回:" + booleanStringMap[false])
+                } else {
+                    attendanceInfoDao.delete(it)
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -282,18 +290,22 @@ class InfoManageActivity : BaseActivity() {
             workerInfoDao.loadAll()
         }
         workerList.forEach {
+            if (!it.getInfo) {
+                return@forEach
+            }
             val map = HashMap<String, Any>()
             map["joinCity"] = User.getInstance().account
             map["projectId"] = User.getInstance().projectId
-            val listMap = ArrayList<Map<String, String>>()
-            val dataMap = HashMap<String, String>()
+            val listMap = ArrayList<Map<String, Any>>()
+            val dataMap = HashMap<String, Any>()
             dataMap["idNumber"] = it.idCard
+            dataMap["thirdNo"] = it.workerCode
             dataMap["name"] = it.name
             dataMap["photo"] = it.picURI
             listMap.add(dataMap)
             map["workerList"] = listMap
             val pushInfo = async {
-                doPostJson(PublicTopicAddress.UPLOAD_WORKER, map)
+                doPostJson(PublicTopicAddress.UPLOAD_WORKER_FOSHAN, map)
             }
             if (checkResult(pushInfo.await())) {
                 workerInfoDao.delete(it)
@@ -322,26 +334,24 @@ class InfoManageActivity : BaseActivity() {
                                 JsonUtils.getJsonValue(dataObject, "checkinTime", "")
                             attendanceInfo.deviceSerialNo =
                                 JsonUtils.getJsonValue(dataObject, "deviceSerialNo", "")
+                            attendanceInfo.idNumber =
+                                JsonUtils.getJsonValue(dataObject, "idNumber", "")
                             attendanceInfo.machineType =
                                 JsonUtils.getJsonValue(dataObject, "machineType", "")
                             attendanceInfo.normalSignImage =
                                 JsonUtils.getJsonValue(dataObject, "normalSignImage", "")
                             attendanceInfo.projectId =
                                 JsonUtils.getJsonValue(dataObject, "projectId", "")
-                            attendanceInfo.redSignImage =
-                                JsonUtils.getJsonValue(dataObject, "redSignImage", "")
                             attendanceInfo.subcontractorId =
                                 JsonUtils.getJsonValue(dataObject, "subcontractorId", "")
                             attendanceInfo.temperature =
                                 JsonUtils.getJsonValue(dataObject, "temperature", "")
+                            attendanceInfo.workerCode =
+                                JsonUtils.getJsonValue(dataObject, "thirdNo", "")
                             attendanceInfo.workerId =
                                 JsonUtils.getJsonValue(dataObject, "workerId", "")
-                            attendanceInfo.workerCode =
-                                JsonUtils.getJsonValue(dataObject, "workerCode", "")
                             attendanceInfo.workerName =
                                 JsonUtils.getJsonValue(dataObject, "workerName", "")
-                            attendanceInfo.idNumber =
-                                JsonUtils.getJsonValue(dataObject, "idNumber", "")
                             attendanceInfoDao.insert(attendanceInfo)
                         }
                     }
@@ -360,7 +370,7 @@ class InfoManageActivity : BaseActivity() {
         map["queryRowId"] = User.getInstance().rowId
         map["signDate"] = User.getInstance().signDate
         val getAttendance = async {
-            doPostJson(PublicTopicAddress.QUERY_PROJECT_SIGN_LIST, map)
+            doPostJson(PublicTopicAddress.QUERY_PROJECT_SIGN_LIST_FOSHAN, map)
         }
         dealAttendanceInfo(getAttendance.await())
     }

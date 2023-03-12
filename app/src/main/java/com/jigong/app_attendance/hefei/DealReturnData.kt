@@ -44,7 +44,7 @@ fun dealManager(deviceNo: String, message: String) {
     when (operator) {
         //设备上线请求的返回，据此修改设备在线状态为在线，让等待的行为进入循环
         ONLINE -> dealOnline(deviceNo, jsonObject)
-        GET_WORKER -> dealWorkerInfo(deviceNo, jsonObject)
+//        GET_WORKER -> dealWorkerInfo(deviceNo, jsonObject)
         ATTENDANCE_RESULT -> deleteAttendance(jsonObject)
         else -> return
     }
@@ -70,38 +70,38 @@ private fun deleteAttendance(jsonObject: JSONObject) {
 * 将工人入库/信息修改
 * 操作结束后调用对应指令回复
 * */
-private fun dealWorkerInfo(deviceNo: String, jsonObject: JSONObject) {
-    val messageId = JsonUtils.getJsonValue(jsonObject, "messageId", "")
-    val jsonArray = JsonUtils.getJSONArray(jsonObject, "info")
-    val sucNum = jsonArray.length()
-    var errNum = sucNum
-    if (jsonArray != null && jsonArray.length() > 0) {
-        val workerInfoDao = MyApplication.getApplication().daoSession.workerInfoDao
-        for (i in 0 until jsonArray.length()) {
-            val workerInfo = WorkerInfo()
-            val infoObject = jsonArray.getJSONObject(i)
-            workerInfo.customId = JsonUtils.getJsonValue(infoObject, "customId", "")
-            workerInfo.name = JsonUtils.getJsonValue(infoObject, "name", "")
-            workerInfo.personType = JsonUtils.getJsonValue(infoObject, "personType", "0")
-            workerInfo.gender = JsonUtils.getJsonValue(infoObject, "gender", "1")
-            workerInfo.idCard = JsonUtils.getJsonValue(infoObject, "idCard", "")
-            workerInfo.cardType = JsonUtils.getJsonValue(infoObject, "cardType", "")
-            workerInfo.birthday = JsonUtils.getJsonValue(infoObject, "birthday", "")
-            workerInfo.picURI = JsonUtils.getJsonValue(infoObject, "picURI", "")
-            val queryWorker = workerInfoDao.queryBuilder().where(WorkerInfoDao.Properties.CustomId.eq(workerInfo.customId)).unique()
-            if (queryWorker == null) {
-                workerInfoDao.insert(workerInfo)
-            } else {
-                workerInfo.id = queryWorker.id
-                workerInfoDao.update(workerInfo)
-            }
-            errNum--
-        }
-    }
-    CoroutineScope(Dispatchers.IO).launch {
-        pushReplyWorkerInfo(messageId, sucNum, errNum, deviceNo)
-    }
-}
+//private fun dealWorkerInfo(deviceNo: String, jsonObject: JSONObject) {
+//    val messageId = JsonUtils.getJsonValue(jsonObject, "messageId", "")
+//    val jsonArray = JsonUtils.getJSONArray(jsonObject, "info")
+//    val sucNum = jsonArray.length()
+//    var errNum = sucNum
+//    if (jsonArray != null && jsonArray.length() > 0) {
+//        val workerInfoDao = MyApplication.getApplication().daoSession.workerInfoDao
+//        for (i in 0 until jsonArray.length()) {
+//            val workerInfo = WorkerInfo()
+//            val infoObject = jsonArray.getJSONObject(i)
+//            workerInfo.customId = JsonUtils.getJsonValue(infoObject, "customId", "")
+//            workerInfo.name = JsonUtils.getJsonValue(infoObject, "name", "")
+//            workerInfo.personType = JsonUtils.getJsonValue(infoObject, "personType", "0")
+//            workerInfo.gender = JsonUtils.getJsonValue(infoObject, "gender", "1")
+//            workerInfo.idCard = JsonUtils.getJsonValue(infoObject, "idCard", "")
+//            workerInfo.cardType = JsonUtils.getJsonValue(infoObject, "cardType", "")
+//            workerInfo.birthday = JsonUtils.getJsonValue(infoObject, "birthday", "")
+//            workerInfo.picURI = JsonUtils.getJsonValue(infoObject, "picURI", "")
+//            val queryWorker = workerInfoDao.queryBuilder().where(WorkerInfoDao.Properties.CustomId.eq(workerInfo.customId)).unique()
+//            if (queryWorker == null) {
+//                workerInfoDao.insert(workerInfo)
+//            } else {
+//                workerInfo.id = queryWorker.id
+//                workerInfoDao.update(workerInfo)
+//            }
+//            errNum--
+//        }
+//    }
+//    CoroutineScope(Dispatchers.IO).launch {
+//        pushReplyWorkerInfo(messageId, sucNum, errNum, deviceNo)
+//    }
+//}
 
 private fun dealOnline(deviceNo: String, jsonObject: JSONObject) {
     val info = JsonUtils.getJSONObject(jsonObject, "info")

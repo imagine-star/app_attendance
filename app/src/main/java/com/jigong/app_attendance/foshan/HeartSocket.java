@@ -1,4 +1,4 @@
-package com.jigong.app_attendance.socket;
+package com.jigong.app_attendance.foshan;
 
 import android.text.TextUtils;
 
@@ -34,12 +34,12 @@ public class HeartSocket {
                     String t = result;
                     String cmd = t.substring(28, 32);
                     if ("FFFF".equals(cmd)) {
-//                        logger.info("接收到心跳返回数据" + result);
+                        System.out.println("接收到心跳返回数据");
                     }
                     break;
                 }
-                if (count % 5 == 0) {
-//                    logger.info("无返回值");
+                if (count % 10 == 0) {
+                    System.out.println("设备心跳无返回值");
                     break;
                 }
                 //Thread.sleep(1000);

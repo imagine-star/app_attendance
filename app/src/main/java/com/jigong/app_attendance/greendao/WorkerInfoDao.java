@@ -35,7 +35,8 @@ public class WorkerInfoDao extends AbstractDao<WorkerInfo, Long> {
         public final static Property IdCard = new Property(8, String.class, "idCard", false, "ID_CARD");
         public final static Property CardType = new Property(9, String.class, "cardType", false, "CARD_TYPE");
         public final static Property Birthday = new Property(10, String.class, "birthday", false, "BIRTHDAY");
-        public final static Property PicURI = new Property(11, String.class, "picURI", false, "PIC_URI");
+        public final static Property PicURI = new Property(11, byte[].class, "picURI", false, "PIC_URI");
+        public final static Property GetInfo = new Property(12, boolean.class, "getInfo", false, "GET_INFO");
     }
 
 
@@ -62,7 +63,8 @@ public class WorkerInfoDao extends AbstractDao<WorkerInfo, Long> {
                 "\"ID_CARD\" TEXT," + // 8: idCard
                 "\"CARD_TYPE\" TEXT," + // 9: cardType
                 "\"BIRTHDAY\" TEXT," + // 10: birthday
-                "\"PIC_URI\" TEXT);"); // 11: picURI
+                "\"PIC_URI\" BLOB," + // 11: picURI
+                "\"GET_INFO\" INTEGER NOT NULL );"); // 12: getInfo
     }
 
     /** Drops the underlying database table. */
@@ -130,10 +132,11 @@ public class WorkerInfoDao extends AbstractDao<WorkerInfo, Long> {
             stmt.bindString(11, birthday);
         }
  
-        String picURI = entity.getPicURI();
+        byte[] picURI = entity.getPicURI();
         if (picURI != null) {
-            stmt.bindString(12, picURI);
+            stmt.bindBlob(12, picURI);
         }
+        stmt.bindLong(13, entity.getGetInfo() ? 1L: 0L);
     }
 
     @Override
@@ -195,10 +198,11 @@ public class WorkerInfoDao extends AbstractDao<WorkerInfo, Long> {
             stmt.bindString(11, birthday);
         }
  
-        String picURI = entity.getPicURI();
+        byte[] picURI = entity.getPicURI();
         if (picURI != null) {
-            stmt.bindString(12, picURI);
+            stmt.bindBlob(12, picURI);
         }
+        stmt.bindLong(13, entity.getGetInfo() ? 1L: 0L);
     }
 
     @Override
@@ -220,7 +224,8 @@ public class WorkerInfoDao extends AbstractDao<WorkerInfo, Long> {
             cursor.isNull(offset + 8) ? null : cursor.getString(offset + 8), // idCard
             cursor.isNull(offset + 9) ? null : cursor.getString(offset + 9), // cardType
             cursor.isNull(offset + 10) ? null : cursor.getString(offset + 10), // birthday
-            cursor.isNull(offset + 11) ? null : cursor.getString(offset + 11) // picURI
+            cursor.isNull(offset + 11) ? null : cursor.getBlob(offset + 11), // picURI
+            cursor.getShort(offset + 12) != 0 // getInfo
         );
         return entity;
     }
@@ -238,7 +243,8 @@ public class WorkerInfoDao extends AbstractDao<WorkerInfo, Long> {
         entity.setIdCard(cursor.isNull(offset + 8) ? null : cursor.getString(offset + 8));
         entity.setCardType(cursor.isNull(offset + 9) ? null : cursor.getString(offset + 9));
         entity.setBirthday(cursor.isNull(offset + 10) ? null : cursor.getString(offset + 10));
-        entity.setPicURI(cursor.isNull(offset + 11) ? null : cursor.getString(offset + 11));
+        entity.setPicURI(cursor.isNull(offset + 11) ? null : cursor.getBlob(offset + 11));
+        entity.setGetInfo(cursor.getShort(offset + 12) != 0);
      }
     
     @Override

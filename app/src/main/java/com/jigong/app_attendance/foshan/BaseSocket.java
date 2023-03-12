@@ -1,4 +1,4 @@
-package com.jigong.app_attendance.socket;
+package com.jigong.app_attendance.foshan;
 
 
 import com.jigong.app_attendance.info.User;
@@ -101,7 +101,7 @@ public class BaseSocket {
             e.printStackTrace();
         }
         String idNumberToHex = HexUtil.strTo16FullLength(idNumber, 36);
-        String deviceIdToHex = HexUtil.strTo16FullLength(User.getInstance().getProjectId(), 64);
+        String deviceIdToHex = HexUtil.strTo16FullLength(User.getInstance().getInDeviceNo(), 64);
         String content = deviceIdToHex + idNumberToHex;
         String length = HexUtil.byte2Hex(HexUtil.unlong2H4bytes((content.length() / 2) + 1));
         length = HexUtil.fullLength(length, 8);
@@ -117,7 +117,7 @@ public class BaseSocket {
                 HexUtil.getBCC(content.getBytes()) +//xor运算
                 "00" +//状态
                 "01";//结束标记
-        WorkerInfoSocket.sendMsg(info, client);
+        WorkerInfoSocket.sendMsg(info, idNumber, client);
     }
 
     public static void sendHeartInfo(NioClient nioClient) {

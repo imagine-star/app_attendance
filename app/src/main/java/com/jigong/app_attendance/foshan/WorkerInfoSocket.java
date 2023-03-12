@@ -1,4 +1,4 @@
-package com.jigong.app_attendance.socket;
+package com.jigong.app_attendance.foshan;
 
 import android.text.TextUtils;
 
@@ -7,7 +7,6 @@ import com.jigong.app_attendance.bean.WorkerInfo;
 import com.jigong.app_attendance.greendao.WorkerInfoDao;
 import com.jigong.app_attendance.info.User;
 
-import cn.hutool.core.codec.Base64Encoder;
 import cn.hutool.core.io.BufferUtil;
 import cn.hutool.core.io.IORuntimeException;
 import cn.hutool.core.util.HexUtil;
@@ -27,7 +26,7 @@ public class WorkerInfoSocket {
 
     private static volatile String result = "";
 
-    public synchronized static void sendMsg(String info, NioClient client) {
+    public synchronized static void sendMsg(String info, String recordId, NioClient client) {
         WorkerInfoSocket.client = client;
         WorkerInfoSocket.listen();
         if (TextUtils.isEmpty(info)) {
@@ -47,16 +46,16 @@ public class WorkerInfoSocket {
                     int lenth = Integer.parseInt(com.jigong.app_attendance.utils.HexUtil.reverseString(result.substring(2, 10)), 16);
                     String code = result.substring(64 + lenth * 2, 66 + lenth * 2);
                     if ("00".equals(code) || lenth > 100) {
-//                        logger.info("获取人员特征信息成功, projectId={}", commonProject.getProjectId());
+                        System.out.println("获取人员特征信息成功, projectId=" + User.getInstance().getProjectId());
                         String t = result;
                         String resultContent = t.substring(64);
                         workerCode = resultContent.substring(0, 8);
                         name = HexUtil.decodeHexStr(resultContent.substring(8, 68), StandardCharsets.UTF_8);
                         idNumber = HexUtil.decodeHexStr(resultContent.substring(68, 104), StandardCharsets.US_ASCII);
                         gender = HexUtil.decodeHexStr(resultContent.substring(106, 110), StandardCharsets.US_ASCII);
-//                        String string = com.jigong.app_attendance.utils.HexUtil.reverseString(resultContent.substring(670, 678));
-//                        int glLong = Integer.parseInt(string, 16);
-//                        byte[] bytes = HexUtil.decodeHex(resultContent.substring(678, 678 + (glLong * 2)));
+                        String string = com.jigong.app_attendance.utils.HexUtil.reverseString(resultContent.substring(670, 678));
+                        int glLong = Integer.parseInt(string, 16);
+                        byte[] bytes = HexUtil.decodeHex(resultContent.substring(678, 678 + (glLong * 2)));
 //                        String glImage = Base64Encoder.encode(bytes);
                         WorkerInfoDao workerInfoDao = MyApplication.getApplication().getDaoSession().getWorkerInfoDao();
                         WorkerInfo workerInfo = workerInfoDao.queryBuilder().where(WorkerInfoDao.Properties.IdNumber.eq(idNumber)).unique();
@@ -66,13 +65,96 @@ public class WorkerInfoSocket {
                             workerInfo.setName(name);
                             workerInfo.setIdNumber(idNumber);
                             workerInfo.setGender(gender);
-                            workerInfoDao.update(workerInfo);
+                            workerInfo.setPicURI(bytes);
+                            workerInfo.setGetInfo(true);
+                            workerInfoDao.insert(workerInfo);
                         } else {
                             workerInfo.setWorkerCode(workerCode);
                             workerInfo.setName(name);
                             workerInfo.setIdNumber(idNumber);
                             workerInfo.setGender(gender);
+                            workerInfo.setPicURI(bytes);
+                            workerInfo.setGetInfo(true);
+                            workerInfoDao.update(workerInfo);
+                        }
+                    } else {
+                        String resultContent = result.substring(64, 64 + (lenth) * 2);
+                        System.out.println("获取人员信息失败, projectId=" + User.getInstance().getProjectId() +
+                                ", 原因是：" + com.jigong.app_attendance.utils.HexUtil.hexStringToString(resultContent) +
+                                "，身份证号：" + recordId +
+                                ", 返回报文: " + result);
+                        break;
+                    }
+                    break;
+                }
+                if (count % 10 == 0) {
+                    System.out.println("获取人员特征值无返回值");
+                    break;
+                }
+                count++;
+                Thread.sleep(80);
+                WorkerInfoSocket.listen();
+            }
+        } catch (IORuntimeException e) {
+            if (client != null) {
+                client.close();
+            }
+            WorkerInfoSocket.listen();
+        } catch (Exception e) {
+//            logger.error("error:", e);
+        }
+        result = "";
+    }
+
+    public synchronized static void sendMsgTest(NioClient client) {
+        String info = "01330000000000000000000000014D03AF5D144AB54D484DB71DA55DBEDF593C61663564313434616235346434383464623731646135356462656466353933633434303632333139363930353034343731380A0001";
+        WorkerInfoSocket.client = client;
+        WorkerInfoSocket.listen();
+        if (TextUtils.isEmpty(info)) {
+            return;
+        }
+        try {
+            byte[] m = com.jigong.app_attendance.utils.HexUtil.hexStringToBytes(info);
+            client.write(BufferUtil.create(m));
+            WorkerInfoSocket.listen();
+            Integer count = 1;
+            while (true) {
+                if (StrUtil.isNotBlank(WorkerInfoSocket.result)) {
+                    String workerCode = "";
+                    String name = "";
+                    String idNumber = "";
+                    String gender = "";
+                    int lenth = Integer.parseInt(com.jigong.app_attendance.utils.HexUtil.reverseString(result.substring(2, 10)), 16);
+                    String code = result.substring(64 + lenth * 2, 66 + lenth * 2);
+                    if ("00".equals(code) || lenth > 100) {
+                        System.out.println("获取人员特征信息成功, projectId=" + User.getInstance().getProjectId());
+                        String t = result;
+                        String resultContent = t.substring(64);
+                        workerCode = resultContent.substring(0, 8);
+                        name = HexUtil.decodeHexStr(resultContent.substring(8, 68), StandardCharsets.UTF_8);
+                        idNumber = HexUtil.decodeHexStr(resultContent.substring(68, 104), StandardCharsets.US_ASCII);
+                        gender = HexUtil.decodeHexStr(resultContent.substring(106, 110), StandardCharsets.US_ASCII);
+                        String string = com.jigong.app_attendance.utils.HexUtil.reverseString(resultContent.substring(670, 678));
+                        int glLong = Integer.parseInt(string, 16);
+                        byte[] bytes = HexUtil.decodeHex(resultContent.substring(678, 678 + (glLong * 2)));
+//                        String glImage = Base64Encoder.encode(bytes);
+                        WorkerInfoDao workerInfoDao = MyApplication.getApplication().getDaoSession().getWorkerInfoDao();
+                        WorkerInfo workerInfo = workerInfoDao.queryBuilder().where(WorkerInfoDao.Properties.IdNumber.eq(idNumber)).unique();
+                        if (workerInfo == null) {
+                            workerInfo = new WorkerInfo();
+                            workerInfo.setWorkerCode(workerCode);
+                            workerInfo.setName(name);
+                            workerInfo.setIdNumber(idNumber);
+                            workerInfo.setGender(gender);
+                            workerInfo.setPicURI(bytes);
                             workerInfoDao.insert(workerInfo);
+                        } else {
+                            workerInfo.setWorkerCode(workerCode);
+                            workerInfo.setName(name);
+                            workerInfo.setIdNumber(idNumber);
+                            workerInfo.setGender(gender);
+                            workerInfo.setPicURI(bytes);
+                            workerInfoDao.update(workerInfo);
                         }
                     } else {
                         String resultContent = result.substring(64, 64 + (lenth) * 2);
@@ -84,7 +166,7 @@ public class WorkerInfoSocket {
                     break;
                 }
                 if (count % 10 == 0) {
-//                    logger.info("无返回值");
+                    System.out.println("获取人员特征值无返回值");
                     break;
                 }
                 count++;

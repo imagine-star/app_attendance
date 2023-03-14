@@ -1,6 +1,7 @@
 package com.jigong.app_attendance.utils
 
 import android.text.TextUtils
+import com.jigong.app_attendance.info.printAndLog
 import org.json.JSONObject
 
 /**
@@ -16,8 +17,13 @@ fun checkResult(result: String): Boolean {
     if (!TextUtils.isEmpty(result)) {
         val jsonObject = JSONObject(result)
         val respCode = JsonUtils.getJsonValue(jsonObject, "respCode", "")
-        if (respCode == "1") {
-            return true
+        return if (respCode.equals("1")) {
+            true
+        } else {
+            val entry = JsonUtils.getJSONObject(jsonObject, "entry")
+            val respMsg = JsonUtils.getJsonValue(entry, "respMsg", "")
+            "济工网接口请求失败返回：$respMsg".printAndLog()
+            false
         }
     }
     return false

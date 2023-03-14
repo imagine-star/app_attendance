@@ -26,11 +26,13 @@ public class WorkerInfo {
     private String birthday;//(可选)生日: 格式 1960-01-31
     private byte[] picURI;//人员照片 uri 地址
     private boolean getInfo = false;//是否从平台获取到了工人信息，false未获取到，true已获取到
+    private boolean hasPush = false;//是否已上传济工网平台，false未上传，true已上传
 
-    @Generated(hash = 35714920)
+    @Generated(hash = 1896473396)
     public WorkerInfo(Long id, String customId, String workerId, String workerCode,
             String name, String idNumber, String personType, String gender, String idCard,
-            String cardType, String birthday, byte[] picURI, boolean getInfo) {
+            String cardType, String birthday, byte[] picURI, boolean getInfo,
+            boolean hasPush) {
         this.id = id;
         this.customId = customId;
         this.workerId = workerId;
@@ -44,6 +46,7 @@ public class WorkerInfo {
         this.birthday = birthday;
         this.picURI = picURI;
         this.getInfo = getInfo;
+        this.hasPush = hasPush;
     }
 
     @Generated(hash = 1000580303)
@@ -152,6 +155,14 @@ public class WorkerInfo {
 
     public void setGetInfo(boolean getInfo) {
         this.getInfo = getInfo;
+    }
+
+    public boolean getHasPush() {
+        return this.hasPush;
+    }
+
+    public void setHasPush(boolean hasPush) {
+        this.hasPush = hasPush;
     }
 
 }

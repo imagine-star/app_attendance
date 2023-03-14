@@ -2,7 +2,6 @@ package com.jigong.app_attendance.foshan;
 
 
 import com.jigong.app_attendance.info.User;
-import com.jigong.app_attendance.utils.HexUtil;
 
 import cn.hutool.socket.nio.NioClient;
 
@@ -51,7 +50,7 @@ public class BaseSocket {
         return map;
     }
 
-    public static void getWorkerCode2(NioClient client) {
+    public static String getWorkerCode2(NioClient client) {
         String content = "FFFF" + "FFFFFFFF";
         String lenth = Integer.toHexString((content.getBytes().length + 2) / 2);
         String info = "01" +//开始标记
@@ -67,7 +66,7 @@ public class BaseSocket {
                 "00" +//状态
                 "01";//结束标记
 //        logger.info("获取人员特征信息, 发送报文:{}, projectId={}", info, commonProject.getProjectId());
-        WorkerCodeSocketTest.sendMsg(info, client);
+        return WorkerCodeSocketTest.sendMsg(info, client);
     }
 
     public static Map<Boolean, String> sendAttendance(String workerCode, String date, byte[] image, NioClient client) {
@@ -94,7 +93,7 @@ public class BaseSocket {
         return WorkerAttendanceTestSocket.sendWorkerAttendance(info, client);
     }
 
-    public static void getWorkerInfo(String idNumber, NioClient client) {
+    public static String getWorkerInfo(String idNumber, NioClient client) {
         try {
             Thread.sleep(10000L);
         } catch (InterruptedException e) {
@@ -117,7 +116,7 @@ public class BaseSocket {
                 HexUtil.getBCC(content.getBytes()) +//xor运算
                 "00" +//状态
                 "01";//结束标记
-        WorkerInfoSocket.sendMsg(info, idNumber, client);
+        return WorkerInfoSocket.sendMsg(info, idNumber, client);
     }
 
     public static void sendHeartInfo(NioClient nioClient) {

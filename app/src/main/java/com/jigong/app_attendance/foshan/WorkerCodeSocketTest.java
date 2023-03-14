@@ -2,7 +2,7 @@ package com.jigong.app_attendance.foshan;
 
 import android.text.TextUtils;
 
-import com.jigong.app_attendance.MyApplication;
+import com.jigong.app_attendance.mainpublic.MyApplication;
 import com.jigong.app_attendance.bean.WorkerInfo;
 import com.jigong.app_attendance.greendao.WorkerInfoDao;
 import com.jigong.app_attendance.info.User;
@@ -28,10 +28,11 @@ public class WorkerCodeSocketTest {
 
     private static volatile String result = "";
 
-    public static void sendMsg(String info, NioClient client) {
+    public static String sendMsg(String info, NioClient client) {
         WorkerCodeSocketTest.client = client;
+        StringBuilder resultString = new StringBuilder();
         if (TextUtils.isEmpty(info)) {
-            return;
+            return "获取白名单无请求信息，直接返回";
         }
         WorkerInfoDao workerInfoDao = MyApplication.getApplication().getDaoSession().getWorkerInfoDao();
         List<WorkerInfo> workerInfos = workerInfoDao.queryBuilder().list();
@@ -42,7 +43,7 @@ public class WorkerCodeSocketTest {
             }
         }
         try {
-            byte[] m = com.jigong.app_attendance.utils.HexUtil.hexStringToBytes(info);
+            byte[] m = com.jigong.app_attendance.foshan.HexUtil.hexStringToBytes(info);
             client.write(BufferUtil.create(m));
             WorkerCodeSocketTest.listen();
 //            Thread.sleep(1000);
@@ -55,7 +56,7 @@ public class WorkerCodeSocketTest {
                     String workerCode = "";
                     String name = "";
                     String idNumber = "";
-                    int lenth = Integer.parseInt(com.jigong.app_attendance.utils.HexUtil.reverseString(result.substring(2, 10)), 16);
+                    int lenth = Integer.parseInt(com.jigong.app_attendance.foshan.HexUtil.reverseString(result.substring(2, 10)), 16);
                     boolean overRange = false;
                     String code = null;
                     try {
@@ -83,10 +84,11 @@ public class WorkerCodeSocketTest {
                                     workerInfo.setWorkerCode(workerCode);
                                     workerInfo.setName(name);
                                     workerInfo.setIdNumber(idNumber);
+                                    workerInfo.setHasPush(false);
                                     workerInfoDao.insert(workerInfo);
                                 }
                                 if (!workerInfo.getGetInfo()) {
-                                    BaseSocket.getWorkerInfo(idNumber, client);
+                                    resultString.append(BaseSocket.getWorkerInfo(idNumber, client)).append("\n");
                                 }
                             } catch (Exception e) {
                                 e.printStackTrace();
@@ -99,8 +101,11 @@ public class WorkerCodeSocketTest {
                         }
                     } else {
                         String resultContent = result.substring(64, 64 + (lenth) * 2);
+                        resultString = new StringBuilder("获取白名单失败, projectId=" + User.getInstance().getProjectId() +
+                                ", 原因是：" + com.jigong.app_attendance.foshan.HexUtil.hexStringToString(resultContent) +
+                                ", 返回报文: " + result);
                         System.out.println("获取白名单失败, projectId=" + User.getInstance().getProjectId() +
-                                ", 原因是：" + com.jigong.app_attendance.utils.HexUtil.hexStringToString(resultContent) +
+                                ", 原因是：" + com.jigong.app_attendance.foshan.HexUtil.hexStringToString(resultContent) +
                                 ", 返回报文: " + result);
                         break;
                     }
@@ -122,7 +127,7 @@ public class WorkerCodeSocketTest {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        result = "";
+        return resultString.toString();
     }
 
 

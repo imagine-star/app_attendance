@@ -1,4 +1,4 @@
-package com.jigong.app_attendance;
+package com.jigong.app_attendance.mainpublic;
 
 import android.app.Application;
 import android.database.sqlite.SQLiteDatabase;

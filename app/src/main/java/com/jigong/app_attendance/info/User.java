@@ -16,10 +16,17 @@ public class User {
     private final String IN_ONLINE = "IN_ONLINE";
     private final String OUT_ONLINE = "OUT_ONLINE";
     private final String LOGIN = "LOGIN";
-    private final String TOKEN = "TOKEN";
     private final String ACCOUNT = "ACCOUNT";
     private final String ROWID = "ROWID";
     private final String SIGN_DATE = "SIGN_DATE";
+    private final String GOMEET_TOKEN = "GOMEET_TOKEN";
+    private final String joinCode = "joinCode";
+    private final String joinPassword = "joinPassword";
+    private final String joinProject = "joinProject";
+    private final String joinDevice = "joinDevice";
+    private final String joinPlatform = "joinPlatform";
+    private final String developKey = "developKey";
+    private final String developSecret = "developSecret";
 
     private final SavedSharedPreferences mPreferences;
 
@@ -35,6 +42,22 @@ public class User {
     private User() {
         super();
         mPreferences = SavedSharedPreferences.getInstance();
+    }
+
+    public interface InOnlineChangeListener {	// 创建interface类
+        void onChange();    // 值改变
+    }
+    private static InOnlineChangeListener inOnlineChangeListener;	// 声明interface接口
+    public static void setInOnlineChangeListener(InOnlineChangeListener onChange){	// 创建setListener方法
+        inOnlineChangeListener = onChange;
+    }
+
+    public interface OutOnlineChangeListener {	// 创建interface类
+        void onChange();    // 值改变
+    }
+    private static OutOnlineChangeListener outOnlineChangeListener;	// 声明interface接口
+    public static void setOutOnlineChangeListener(OutOnlineChangeListener onChange){	// 创建setListener方法
+        outOnlineChangeListener = onChange;
     }
 
     public String getSignDate() {
@@ -61,12 +84,12 @@ public class User {
         mPreferences.setStringValue(ACCOUNT, account);
     }
 
-    public String getToken() {
-        return mPreferences.getStringValue(TOKEN);
+    public String getJoinCode() {
+        return mPreferences.getStringValue(joinCode);
     }
 
-    public void setToken(String token) {
-        mPreferences.setStringValue(TOKEN, token);
+    public void setJoinCode(String joinCode) {
+        mPreferences.setStringValue(this.joinCode, joinCode);
     }
 
     public boolean getLogin() {
@@ -83,6 +106,9 @@ public class User {
 
     public void setInOnline(boolean inOnline) {
         mPreferences.setBooleanValue(IN_ONLINE, inOnline);
+        if (inOnlineChangeListener != null) {
+            inOnlineChangeListener.onChange();
+        }
     }
 
     public boolean getOutOnline() {
@@ -91,6 +117,9 @@ public class User {
 
     public void setOutOnline(boolean outOnline) {
         mPreferences.setBooleanValue(OUT_ONLINE, outOnline);
+        if (outOnlineChangeListener != null) {
+            outOnlineChangeListener.onChange();
+        }
     }
 
     public String getProjectName() {
@@ -139,6 +168,62 @@ public class User {
 
     public void setPassWord(String passWord) {
         mPreferences.setStringValue(PASS_WORD, passWord);
+    }
+
+    public void setGomeetToken(String gomeetToken) {
+        mPreferences.setStringValue(GOMEET_TOKEN, gomeetToken);
+    }
+
+    public String getGomeetToken() {
+        return mPreferences.getStringValue(GOMEET_TOKEN);
+    }
+
+    public String getJoinPassword() {
+        return mPreferences.getStringValue(joinPassword);
+    }
+
+    public void setJoinPassword(String joinPassword) {
+        mPreferences.setStringValue(this.joinPassword, joinPassword);
+    }
+
+    public String getJoinProject() {
+        return mPreferences.getStringValue(joinProject);
+    }
+
+    public void setJoinProject(String joinProject) {
+        mPreferences.setStringValue(this.joinProject, joinProject);
+    }
+
+    public String getJoinDevice() {
+        return mPreferences.getStringValue(joinDevice);
+    }
+
+    public void setJoinDevice(String joinDevice) {
+        mPreferences.setStringValue(this.joinDevice, joinDevice);
+    }
+
+    public String getJoinPlatform() {
+        return mPreferences.getStringValue(joinPlatform);
+    }
+
+    public void setJoinPlatform(String joinPlatform) {
+        mPreferences.setStringValue(this.joinPlatform, joinPlatform);
+    }
+
+    public String getDevelopKey() {
+        return mPreferences.getStringValue(developKey);
+    }
+
+    public void setDevelopKey(String developKey) {
+        mPreferences.setStringValue(this.developKey, developKey);
+    }
+
+    public String getDevelopSecret() {
+        return mPreferences.getStringValue(developSecret);
+    }
+
+    public void setDevelopSecret(String developSecret) {
+        mPreferences.setStringValue(this.developSecret, developSecret);
     }
 
     public void clearAll() {

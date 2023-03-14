@@ -2,7 +2,6 @@ package com.jigong.app_attendance.foshan;
 
 
 import com.jigong.app_attendance.info.PublicTopicAddress;
-import com.jigong.app_attendance.utils.HexUtil;
 
 import cn.hutool.core.io.BufferUtil;
 import cn.hutool.core.io.IORuntimeException;

@@ -29,7 +29,7 @@ public class WorkerAttendanceTestSocket {
             return null;
         }
         try {
-            byte[] m = com.jigong.app_attendance.utils.HexUtil.hexStringToBytes(info);
+            byte[] m = com.jigong.app_attendance.foshan.HexUtil.hexStringToBytes(info);
             client.write(BufferUtil.create(m));
             Integer count = 1;
             while (true) {
@@ -38,15 +38,15 @@ public class WorkerAttendanceTestSocket {
                     String cmd = t.substring(28, 32);
                     if ("5003".equals(cmd)) {
                         System.out.println("接收到上传人员考勤信息返回数据" + result);
-                        int lenth = Integer.parseInt(com.jigong.app_attendance.utils.HexUtil.reverseString(result.substring(2, 10)), 16);
+                        int lenth = Integer.parseInt(com.jigong.app_attendance.foshan.HexUtil.reverseString(result.substring(2, 10)), 16);
                         String resultContent = result.substring(64, 64 + lenth * 2);
                         String code = result.substring(64 + lenth * 2, 66 + lenth * 2);
                         if ("00".equals(code)) {
                             System.out.println("上传人员考勤信息成功！");
                             map.put(true, "上传成功");
                         } else {
-                            System.out.println("上传人员考勤信息失败！原因是：" + com.jigong.app_attendance.utils.HexUtil.hexStringToString(resultContent));
-                            map.put(false, com.jigong.app_attendance.utils.HexUtil.hexStringToString(resultContent));
+                            System.out.println("上传人员考勤信息失败！原因是：" + com.jigong.app_attendance.foshan.HexUtil.hexStringToString(resultContent));
+                            map.put(false, com.jigong.app_attendance.foshan.HexUtil.hexStringToString(resultContent));
                         }
                     }
                     break;

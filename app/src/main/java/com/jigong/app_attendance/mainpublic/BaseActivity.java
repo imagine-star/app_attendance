@@ -1,4 +1,4 @@
-package com.jigong.app_attendance;
+package com.jigong.app_attendance.mainpublic;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -6,6 +6,8 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.widget.Toast;
+
+import com.jigong.app_attendance.R;
 
 public class BaseActivity extends AppCompatActivity {
 

@@ -2,8 +2,6 @@ package com.jigong.app_attendance.foshan;
 
 import android.text.TextUtils;
 
-import com.jigong.app_attendance.utils.HexUtil;
-
 import cn.hutool.core.io.BufferUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.socket.nio.NioClient;

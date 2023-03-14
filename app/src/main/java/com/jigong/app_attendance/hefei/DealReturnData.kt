@@ -1,16 +1,10 @@
 package com.jigong.app_attendance.hefei
 
 import android.text.TextUtils
-import com.jigong.app_attendance.MyApplication
-import com.jigong.app_attendance.bean.WorkerInfo
+import com.jigong.app_attendance.mainpublic.MyApplication
 import com.jigong.app_attendance.greendao.AttendanceInfoDao
-import com.jigong.app_attendance.greendao.WorkerInfoDao
 import com.jigong.app_attendance.info.User
 import com.jigong.app_attendance.utils.JsonUtils
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import org.json.JSONArray
 import org.json.JSONObject
 
 /**

@@ -37,6 +37,7 @@ public class WorkerInfoDao extends AbstractDao<WorkerInfo, Long> {
         public final static Property Birthday = new Property(10, String.class, "birthday", false, "BIRTHDAY");
         public final static Property PicURI = new Property(11, byte[].class, "picURI", false, "PIC_URI");
         public final static Property GetInfo = new Property(12, boolean.class, "getInfo", false, "GET_INFO");
+        public final static Property HasPush = new Property(13, boolean.class, "hasPush", false, "HAS_PUSH");
     }
 
 
@@ -64,7 +65,8 @@ public class WorkerInfoDao extends AbstractDao<WorkerInfo, Long> {
                 "\"CARD_TYPE\" TEXT," + // 9: cardType
                 "\"BIRTHDAY\" TEXT," + // 10: birthday
                 "\"PIC_URI\" BLOB," + // 11: picURI
-                "\"GET_INFO\" INTEGER NOT NULL );"); // 12: getInfo
+                "\"GET_INFO\" INTEGER NOT NULL ," + // 12: getInfo
+                "\"HAS_PUSH\" INTEGER NOT NULL );"); // 13: hasPush
     }
 
     /** Drops the underlying database table. */
@@ -137,6 +139,7 @@ public class WorkerInfoDao extends AbstractDao<WorkerInfo, Long> {
             stmt.bindBlob(12, picURI);
         }
         stmt.bindLong(13, entity.getGetInfo() ? 1L: 0L);
+        stmt.bindLong(14, entity.getHasPush() ? 1L: 0L);
     }
 
     @Override
@@ -203,6 +206,7 @@ public class WorkerInfoDao extends AbstractDao<WorkerInfo, Long> {
             stmt.bindBlob(12, picURI);
         }
         stmt.bindLong(13, entity.getGetInfo() ? 1L: 0L);
+        stmt.bindLong(14, entity.getHasPush() ? 1L: 0L);
     }
 
     @Override
@@ -225,7 +229,8 @@ public class WorkerInfoDao extends AbstractDao<WorkerInfo, Long> {
             cursor.isNull(offset + 9) ? null : cursor.getString(offset + 9), // cardType
             cursor.isNull(offset + 10) ? null : cursor.getString(offset + 10), // birthday
             cursor.isNull(offset + 11) ? null : cursor.getBlob(offset + 11), // picURI
-            cursor.getShort(offset + 12) != 0 // getInfo
+            cursor.getShort(offset + 12) != 0, // getInfo
+            cursor.getShort(offset + 13) != 0 // hasPush
         );
         return entity;
     }
@@ -245,6 +250,7 @@ public class WorkerInfoDao extends AbstractDao<WorkerInfo, Long> {
         entity.setBirthday(cursor.isNull(offset + 10) ? null : cursor.getString(offset + 10));
         entity.setPicURI(cursor.isNull(offset + 11) ? null : cursor.getBlob(offset + 11));
         entity.setGetInfo(cursor.getShort(offset + 12) != 0);
+        entity.setHasPush(cursor.getShort(offset + 13) != 0);
      }
     
     @Override

@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:gravity="center_horizontal"
-    tools:context=".hefei.InfoManageActivity">
+    tools:context=".mainpublic.InfoManageActivity">
 
     <TextView
         android:id="@+id/manager_title"

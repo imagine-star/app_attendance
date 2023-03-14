@@ -23,7 +23,7 @@ public class PublicTopicAddress {
     /*
      *济工网平台登录
      * */
-    public static String LOGIN_FOSHAN = "webapi/handPad/platform/noProjectlogin/v1";
+    public static String LOGIN_FOSHAN = "webapi/handPad/platform/noProjectLogin/v1";
 
     /*
      *济工网平台上传工人信息

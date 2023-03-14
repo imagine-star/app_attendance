@@ -1,10 +1,7 @@
-package com.jigong.app_attendance.foshan
+package com.jigong.app_attendance.mainpublic
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.text.TextUtils
-import com.jigong.app_attendance.BaseActivity
-import com.jigong.app_attendance.MyApplication
 import com.jigong.app_attendance.databinding.ActivityShowNoInfoWorkerBinding
 
 class ShowNoInfoWorkerActivity : BaseActivity() {

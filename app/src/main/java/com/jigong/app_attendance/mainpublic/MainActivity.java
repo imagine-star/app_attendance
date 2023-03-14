@@ -1,17 +1,20 @@
-package com.jigong.app_attendance;
+package com.jigong.app_attendance.mainpublic;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Toast;
 
-import com.jigong.app_attendance.bean.WorkerInfo;
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+
 import com.jigong.app_attendance.databinding.ActivityMainBinding;
-import com.jigong.app_attendance.greendao.WorkerInfoDao;
-import com.jigong.app_attendance.hefei.InfoManageActivity;
 import com.jigong.app_attendance.info.PublicTopicAddress;
 import com.jigong.app_attendance.info.User;
 import com.jigong.app_attendance.utils.CheckUtilsKt;
@@ -21,12 +24,9 @@ import com.jigong.app_attendance.utils.OkHttpApiKt;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-
-import cn.hutool.core.util.HexUtil;
 
 public class MainActivity extends BaseActivity {
 
@@ -41,15 +41,37 @@ public class MainActivity extends BaseActivity {
         setContentView(view);
         User.getInstance().setInOnline(false);
         User.getInstance().setOutOnline(false);
+        binding.userName.setText(User.getInstance().getAccount());
         if (User.getInstance().getLogin()) {
             startActivity(new Intent(MainActivity.this, InfoManageActivity.class));
             finish();
         } else {
-//            binding.passWard.setText("af5d144ab54d484db71da55dbedf593c");
             binding.login.setOnClickListener(view1 -> {
                 binding.login.setOnClickListener(null);
-                loadData();
+                doNext();
             });
+        }
+    }
+
+    private void doNext() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0x66);
+        } else {
+            loadData();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == 0x66) {
+            if (grantResults.length > 0
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                loadData();
+            } else {
+                //申请拒绝
+                Toast.makeText(this, "您已拒绝读写权限，...", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
@@ -89,21 +111,33 @@ public class MainActivity extends BaseActivity {
                         if (CheckUtilsKt.checkResult(result)) {
                             User.getInstance().setLogin(true);
                             JSONObject dataObject = JsonUtils.getJSONObject(entry, "result");
-//                            String userName = "jigong";
-//                            String passWord = "XmcXQNjTUNq@RqN7";
+
                             String account = binding.userName.getText().toString().trim();
                             String projectId = JsonUtils.getJsonValue(dataObject, "projectId", "");
                             String projectName = JsonUtils.getJsonValue(dataObject, "projectName", "");
-                            String token = JsonUtils.getJsonValue(dataObject, "joinCode", "");
+                            String gomeetToken = JsonUtils.getJsonValue(dataObject, "token", "");
 
-//                            User.getInstance().setUserName(userName);
-//                            User.getInstance().setPassWord(passWord);
-                            User.getInstance().setAccount(account);
                             User.getInstance().setProjectId(projectId);
                             User.getInstance().setProjectName(projectName);
-                            User.getInstance().setToken(token);
+                            User.getInstance().setGomeetToken(gomeetToken);
+
                             User.getInstance().setInDeviceNo(projectId);//进场设备sn
                             User.getInstance().setOutDeviceNo(projectId.substring(0, 8) + "1");//出场设备sn
+
+                            String joinCode = JsonUtils.getJsonValue(dataObject, "joinCode", "");
+                            String joinPassword = JsonUtils.getJsonValue(dataObject, "joinPassword", "");
+                            String joinProject = JsonUtils.getJsonValue(dataObject, "joinProject", "");
+                            String joinDevice = JsonUtils.getJsonValue(dataObject, "joinDevice", "");
+                            String joinPlatform = JsonUtils.getJsonValue(dataObject, "joinPlatform", "");
+                            String developKey = JsonUtils.getJsonValue(dataObject, "developKey", "");
+                            String developSecret = JsonUtils.getJsonValue(dataObject, "developSecret", "");
+                            User.getInstance().setJoinCode(joinCode);
+                            User.getInstance().setJoinPassword(joinPassword);
+                            User.getInstance().setJoinProject(joinProject);
+                            User.getInstance().setJoinDevice(joinDevice);
+                            User.getInstance().setJoinPlatform(joinPlatform);
+                            User.getInstance().setDevelopKey(developKey);
+                            User.getInstance().setDevelopSecret(developSecret);
 
                             startActivity(new Intent(MainActivity.this, InfoManageActivity.class));
                             finish();
@@ -116,8 +150,11 @@ public class MainActivity extends BaseActivity {
                 } else {
                     showToastMsgShort("网络错误");
                 }
+                binding.login.setOnClickListener(view1 -> {
+                    binding.login.setOnClickListener(null);
+                    doNext();
+                });
             }
-
         }.execute();
     }
 

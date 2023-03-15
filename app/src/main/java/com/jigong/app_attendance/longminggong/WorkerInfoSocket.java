@@ -1,20 +1,20 @@
-package com.jigong.app_attendance.foshan;
+package com.jigong.app_attendance.longminggong;
 
 import android.text.TextUtils;
 
-import com.jigong.app_attendance.mainpublic.MyApplication;
 import com.jigong.app_attendance.bean.WorkerInfo;
 import com.jigong.app_attendance.greendao.WorkerInfoDao;
 import com.jigong.app_attendance.info.User;
+import com.jigong.app_attendance.mainpublic.MyApplication;
+
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 
 import cn.hutool.core.io.BufferUtil;
 import cn.hutool.core.io.IORuntimeException;
 import cn.hutool.core.util.HexUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.socket.nio.NioClient;
-
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 
 /**
  * @author yuting
@@ -34,7 +34,7 @@ public class WorkerInfoSocket {
             return "获取工人信息无请求信息，直接返回";
         }
         try {
-            byte[] m = com.jigong.app_attendance.foshan.HexUtil.hexStringToBytes(info);
+            byte[] m = com.jigong.app_attendance.longminggong.HexUtil.hexStringToBytes(info);
             client.write(BufferUtil.create(m));
             WorkerInfoSocket.listen();
             Integer count = 1;
@@ -44,7 +44,7 @@ public class WorkerInfoSocket {
                     String name = "";
                     String idNumber = "";
                     String gender = "";
-                    int lenth = Integer.parseInt(com.jigong.app_attendance.foshan.HexUtil.reverseString(result.substring(2, 10)), 16);
+                    int lenth = Integer.parseInt(com.jigong.app_attendance.longminggong.HexUtil.reverseString(result.substring(2, 10)), 16);
                     String code = result.substring(64 + lenth * 2, 66 + lenth * 2);
                     if ("00".equals(code) || lenth > 100) {
                         resultString = "获取人员特征信息成功, projectId=" + User.getInstance().getProjectId();
@@ -54,7 +54,7 @@ public class WorkerInfoSocket {
                         name = HexUtil.decodeHexStr(resultContent.substring(8, 68), StandardCharsets.UTF_8);
                         idNumber = HexUtil.decodeHexStr(resultContent.substring(68, 104), StandardCharsets.US_ASCII);
                         gender = HexUtil.decodeHexStr(resultContent.substring(106, 110), StandardCharsets.US_ASCII);
-                        String string = com.jigong.app_attendance.foshan.HexUtil.reverseString(resultContent.substring(670, 678));
+                        String string = com.jigong.app_attendance.longminggong.HexUtil.reverseString(resultContent.substring(670, 678));
                         int glLong = Integer.parseInt(string, 16);
                         byte[] bytes = HexUtil.decodeHex(resultContent.substring(678, 678 + (glLong * 2)));
 //                        String glImage = Base64Encoder.encode(bytes);
@@ -83,7 +83,7 @@ public class WorkerInfoSocket {
                     } else {
                         String resultContent = result.substring(64, 64 + (lenth) * 2);
                         resultString = "获取人员信息失败, projectId=" + User.getInstance().getProjectId() +
-                                ", 原因是：" + com.jigong.app_attendance.foshan.HexUtil.hexStringToString(resultContent) +
+                                ", 原因是：" + com.jigong.app_attendance.longminggong.HexUtil.hexStringToString(resultContent) +
                                 "，身份证号：" + recordId +
                                 ", 返回报文: " + result;
                         break;
@@ -118,7 +118,7 @@ public class WorkerInfoSocket {
             return;
         }
         try {
-            byte[] m = com.jigong.app_attendance.foshan.HexUtil.hexStringToBytes(info);
+            byte[] m = com.jigong.app_attendance.longminggong.HexUtil.hexStringToBytes(info);
             client.write(BufferUtil.create(m));
             WorkerInfoSocket.listen();
             Integer count = 1;
@@ -128,7 +128,7 @@ public class WorkerInfoSocket {
                     String name = "";
                     String idNumber = "";
                     String gender = "";
-                    int lenth = Integer.parseInt(com.jigong.app_attendance.foshan.HexUtil.reverseString(result.substring(2, 10)), 16);
+                    int lenth = Integer.parseInt(com.jigong.app_attendance.longminggong.HexUtil.reverseString(result.substring(2, 10)), 16);
                     String code = result.substring(64 + lenth * 2, 66 + lenth * 2);
                     if ("00".equals(code) || lenth > 100) {
                         System.out.println("获取人员特征信息成功, projectId=" + User.getInstance().getProjectId());
@@ -138,7 +138,7 @@ public class WorkerInfoSocket {
                         name = HexUtil.decodeHexStr(resultContent.substring(8, 68), StandardCharsets.UTF_8);
                         idNumber = HexUtil.decodeHexStr(resultContent.substring(68, 104), StandardCharsets.US_ASCII);
                         gender = HexUtil.decodeHexStr(resultContent.substring(106, 110), StandardCharsets.US_ASCII);
-                        String string = com.jigong.app_attendance.foshan.HexUtil.reverseString(resultContent.substring(670, 678));
+                        String string = com.jigong.app_attendance.longminggong.HexUtil.reverseString(resultContent.substring(670, 678));
                         int glLong = Integer.parseInt(string, 16);
                         byte[] bytes = HexUtil.decodeHex(resultContent.substring(678, 678 + (glLong * 2)));
 //                        String glImage = Base64Encoder.encode(bytes);
@@ -163,7 +163,7 @@ public class WorkerInfoSocket {
                     } else {
                         String resultContent = result.substring(64, 64 + (lenth) * 2);
                         System.out.println("获取人员信息失败, projectId=" + User.getInstance().getProjectId() +
-                                ", 原因是：" + com.jigong.app_attendance.foshan.HexUtil.hexStringToString(resultContent) +
+                                ", 原因是：" + com.jigong.app_attendance.longminggong.HexUtil.hexStringToString(resultContent) +
                                 ", 返回报文: " + result);
                         break;
                     }

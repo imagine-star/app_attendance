@@ -38,6 +38,11 @@ public class WorkerInfoDao extends AbstractDao<WorkerInfo, Long> {
         public final static Property PicURI = new Property(11, byte[].class, "picURI", false, "PIC_URI");
         public final static Property GetInfo = new Property(12, boolean.class, "getInfo", false, "GET_INFO");
         public final static Property HasPush = new Property(13, boolean.class, "hasPush", false, "HAS_PUSH");
+        public final static Property IsLeader = new Property(14, String.class, "isLeader", false, "IS_LEADER");
+        public final static Property WorkRole = new Property(15, String.class, "workRole", false, "WORK_ROLE");
+        public final static Property WoreType = new Property(16, String.class, "woreType", false, "WORE_TYPE");
+        public final static Property FaceImage = new Property(17, String.class, "faceImage", false, "FACE_IMAGE");
+        public final static Property Present = new Property(18, boolean.class, "present", false, "PRESENT");
     }
 
 
@@ -66,7 +71,12 @@ public class WorkerInfoDao extends AbstractDao<WorkerInfo, Long> {
                 "\"BIRTHDAY\" TEXT," + // 10: birthday
                 "\"PIC_URI\" BLOB," + // 11: picURI
                 "\"GET_INFO\" INTEGER NOT NULL ," + // 12: getInfo
-                "\"HAS_PUSH\" INTEGER NOT NULL );"); // 13: hasPush
+                "\"HAS_PUSH\" INTEGER NOT NULL ," + // 13: hasPush
+                "\"IS_LEADER\" TEXT," + // 14: isLeader
+                "\"WORK_ROLE\" TEXT," + // 15: workRole
+                "\"WORE_TYPE\" TEXT," + // 16: woreType
+                "\"FACE_IMAGE\" TEXT," + // 17: faceImage
+                "\"PRESENT\" INTEGER NOT NULL );"); // 18: present
     }
 
     /** Drops the underlying database table. */
@@ -140,6 +150,27 @@ public class WorkerInfoDao extends AbstractDao<WorkerInfo, Long> {
         }
         stmt.bindLong(13, entity.getGetInfo() ? 1L: 0L);
         stmt.bindLong(14, entity.getHasPush() ? 1L: 0L);
+ 
+        String isLeader = entity.getIsLeader();
+        if (isLeader != null) {
+            stmt.bindString(15, isLeader);
+        }
+ 
+        String workRole = entity.getWorkRole();
+        if (workRole != null) {
+            stmt.bindString(16, workRole);
+        }
+ 
+        String woreType = entity.getWoreType();
+        if (woreType != null) {
+            stmt.bindString(17, woreType);
+        }
+ 
+        String faceImage = entity.getFaceImage();
+        if (faceImage != null) {
+            stmt.bindString(18, faceImage);
+        }
+        stmt.bindLong(19, entity.getPresent() ? 1L: 0L);
     }
 
     @Override
@@ -207,6 +238,27 @@ public class WorkerInfoDao extends AbstractDao<WorkerInfo, Long> {
         }
         stmt.bindLong(13, entity.getGetInfo() ? 1L: 0L);
         stmt.bindLong(14, entity.getHasPush() ? 1L: 0L);
+ 
+        String isLeader = entity.getIsLeader();
+        if (isLeader != null) {
+            stmt.bindString(15, isLeader);
+        }
+ 
+        String workRole = entity.getWorkRole();
+        if (workRole != null) {
+            stmt.bindString(16, workRole);
+        }
+ 
+        String woreType = entity.getWoreType();
+        if (woreType != null) {
+            stmt.bindString(17, woreType);
+        }
+ 
+        String faceImage = entity.getFaceImage();
+        if (faceImage != null) {
+            stmt.bindString(18, faceImage);
+        }
+        stmt.bindLong(19, entity.getPresent() ? 1L: 0L);
     }
 
     @Override
@@ -230,7 +282,12 @@ public class WorkerInfoDao extends AbstractDao<WorkerInfo, Long> {
             cursor.isNull(offset + 10) ? null : cursor.getString(offset + 10), // birthday
             cursor.isNull(offset + 11) ? null : cursor.getBlob(offset + 11), // picURI
             cursor.getShort(offset + 12) != 0, // getInfo
-            cursor.getShort(offset + 13) != 0 // hasPush
+            cursor.getShort(offset + 13) != 0, // hasPush
+            cursor.isNull(offset + 14) ? null : cursor.getString(offset + 14), // isLeader
+            cursor.isNull(offset + 15) ? null : cursor.getString(offset + 15), // workRole
+            cursor.isNull(offset + 16) ? null : cursor.getString(offset + 16), // woreType
+            cursor.isNull(offset + 17) ? null : cursor.getString(offset + 17), // faceImage
+            cursor.getShort(offset + 18) != 0 // present
         );
         return entity;
     }
@@ -251,6 +308,11 @@ public class WorkerInfoDao extends AbstractDao<WorkerInfo, Long> {
         entity.setPicURI(cursor.isNull(offset + 11) ? null : cursor.getBlob(offset + 11));
         entity.setGetInfo(cursor.getShort(offset + 12) != 0);
         entity.setHasPush(cursor.getShort(offset + 13) != 0);
+        entity.setIsLeader(cursor.isNull(offset + 14) ? null : cursor.getString(offset + 14));
+        entity.setWorkRole(cursor.isNull(offset + 15) ? null : cursor.getString(offset + 15));
+        entity.setWoreType(cursor.isNull(offset + 16) ? null : cursor.getString(offset + 16));
+        entity.setFaceImage(cursor.isNull(offset + 17) ? null : cursor.getString(offset + 17));
+        entity.setPresent(cursor.getShort(offset + 18) != 0);
      }
     
     @Override

@@ -1,15 +1,15 @@
-package com.jigong.app_attendance.foshan
+package com.jigong.app_attendance.longminggong
 
 import android.content.Intent
 import android.os.IBinder
 import android.text.TextUtils
 import cn.hutool.socket.nio.NioClient
-import com.jigong.app_attendance.mainpublic.BaseService
-import com.jigong.app_attendance.mainpublic.MyApplication
 import com.jigong.app_attendance.bean.AttendanceInfo
 import com.jigong.app_attendance.info.PublicTopicAddress
 import com.jigong.app_attendance.info.User
 import com.jigong.app_attendance.info.printAndLog
+import com.jigong.app_attendance.mainpublic.BaseService
+import com.jigong.app_attendance.mainpublic.MyApplication
 import com.jigong.app_attendance.utils.JsonUtils
 import com.jigong.app_attendance.utils.checkResult
 import com.jigong.app_attendance.utils.doPostJson
@@ -18,9 +18,11 @@ import org.json.JSONObject
 import java.io.File
 import java.io.FileInputStream
 import java.io.IOException
-import java.util.*
+import java.util.ArrayList
+import java.util.HashMap
+import java.util.TimerTask
 
-class FoShanService : BaseService() {
+class LongMingGongService : BaseService() {
 
     private val mainScope = MainScope()
 
@@ -35,7 +37,6 @@ class FoShanService : BaseService() {
     private val time5: Long = 1000 * 60 * 5
     private val time30: Long = 1000 * 60 * 60
 
-    @DelicateCoroutinesApi
     override fun onCreate() {
         super.onCreate()
         "服务已开始，协程空间已注册".printAndLog()
@@ -289,5 +290,4 @@ class FoShanService : BaseService() {
     override fun onBind(intent: Intent): IBinder {
         TODO("Return the communication channel to the service.")
     }
-
 }

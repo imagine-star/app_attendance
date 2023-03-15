@@ -108,7 +108,7 @@ public class MainActivity extends BaseActivity {
                         JSONObject jsonObject = new JSONObject(result);
                         JSONObject entry = JsonUtils.getJSONObject(jsonObject, "entry");
                         String respMsg = JsonUtils.getJsonValue(entry, "respMsg", "");
-                        if (CheckUtilsKt.checkResult(result)) {
+                        if (CheckUtilsKt.checkResult(PublicTopicAddress.LOGIN_FOSHAN, result)) {
                             User.getInstance().setLogin(true);
                             JSONObject dataObject = JsonUtils.getJSONObject(entry, "result");
 

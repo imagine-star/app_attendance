@@ -13,7 +13,7 @@ import org.json.JSONObject
 /*
 * 返回值检验
 * */
-fun checkResult(result: String): Boolean {
+fun checkResult(title: String, result: String): Boolean {
     if (!TextUtils.isEmpty(result)) {
         val jsonObject = JSONObject(result)
         val respCode = JsonUtils.getJsonValue(jsonObject, "respCode", "")
@@ -22,7 +22,7 @@ fun checkResult(result: String): Boolean {
         } else {
             val entry = JsonUtils.getJSONObject(jsonObject, "entry")
             val respMsg = JsonUtils.getJsonValue(entry, "respMsg", "")
-            "济工网接口请求失败返回：$respMsg".printAndLog()
+            "济工网接口${title}请求失败返回：$respMsg".printAndLog()
             false
         }
     }

@@ -27,13 +27,15 @@ public class AttendanceInfo {
     private String workerCode;
     private String workerName;
     private String idNumber;
+    private String workRole;//人员类型
+    private String woreType;//岗位类型
 
-    @Generated(hash = 1226497033)
+    @Generated(hash = 543862958)
     public AttendanceInfo(Long id, String attendanceId, String checkinTime,
             String deviceSerialNo, String machineType, String normalSignImage,
             String projectId, String redSignImage, String subcontractorId,
             String temperature, String workerId, String workerCode,
-            String workerName, String idNumber) {
+            String workerName, String idNumber, String workRole, String woreType) {
         this.id = id;
         this.attendanceId = attendanceId;
         this.checkinTime = checkinTime;
@@ -48,6 +50,8 @@ public class AttendanceInfo {
         this.workerCode = workerCode;
         this.workerName = workerName;
         this.idNumber = idNumber;
+        this.workRole = workRole;
+        this.woreType = woreType;
     }
 
     @Generated(hash = 495039263)
@@ -164,6 +168,22 @@ public class AttendanceInfo {
 
     public void setWorkerCode(String workerCode) {
         this.workerCode = workerCode;
+    }
+
+    public String getWorkRole() {
+        return this.workRole;
+    }
+
+    public void setWorkRole(String workRole) {
+        this.workRole = workRole;
+    }
+
+    public String getWoreType() {
+        return this.woreType;
+    }
+
+    public void setWoreType(String woreType) {
+        this.woreType = woreType;
     }
 
 }

@@ -38,6 +38,8 @@ public class AttendanceInfoDao extends AbstractDao<AttendanceInfo, Long> {
         public final static Property WorkerCode = new Property(11, String.class, "workerCode", false, "WORKER_CODE");
         public final static Property WorkerName = new Property(12, String.class, "workerName", false, "WORKER_NAME");
         public final static Property IdNumber = new Property(13, String.class, "idNumber", false, "ID_NUMBER");
+        public final static Property WorkRole = new Property(14, String.class, "workRole", false, "WORK_ROLE");
+        public final static Property WoreType = new Property(15, String.class, "woreType", false, "WORE_TYPE");
     }
 
 
@@ -66,7 +68,9 @@ public class AttendanceInfoDao extends AbstractDao<AttendanceInfo, Long> {
                 "\"WORKER_ID\" TEXT," + // 10: workerId
                 "\"WORKER_CODE\" TEXT," + // 11: workerCode
                 "\"WORKER_NAME\" TEXT," + // 12: workerName
-                "\"ID_NUMBER\" TEXT);"); // 13: idNumber
+                "\"ID_NUMBER\" TEXT," + // 13: idNumber
+                "\"WORK_ROLE\" TEXT," + // 14: workRole
+                "\"WORE_TYPE\" TEXT);"); // 15: woreType
     }
 
     /** Drops the underlying database table. */
@@ -148,6 +152,16 @@ public class AttendanceInfoDao extends AbstractDao<AttendanceInfo, Long> {
         if (idNumber != null) {
             stmt.bindString(14, idNumber);
         }
+ 
+        String workRole = entity.getWorkRole();
+        if (workRole != null) {
+            stmt.bindString(15, workRole);
+        }
+ 
+        String woreType = entity.getWoreType();
+        if (woreType != null) {
+            stmt.bindString(16, woreType);
+        }
     }
 
     @Override
@@ -223,6 +237,16 @@ public class AttendanceInfoDao extends AbstractDao<AttendanceInfo, Long> {
         if (idNumber != null) {
             stmt.bindString(14, idNumber);
         }
+ 
+        String workRole = entity.getWorkRole();
+        if (workRole != null) {
+            stmt.bindString(15, workRole);
+        }
+ 
+        String woreType = entity.getWoreType();
+        if (woreType != null) {
+            stmt.bindString(16, woreType);
+        }
     }
 
     @Override
@@ -246,7 +270,9 @@ public class AttendanceInfoDao extends AbstractDao<AttendanceInfo, Long> {
             cursor.isNull(offset + 10) ? null : cursor.getString(offset + 10), // workerId
             cursor.isNull(offset + 11) ? null : cursor.getString(offset + 11), // workerCode
             cursor.isNull(offset + 12) ? null : cursor.getString(offset + 12), // workerName
-            cursor.isNull(offset + 13) ? null : cursor.getString(offset + 13) // idNumber
+            cursor.isNull(offset + 13) ? null : cursor.getString(offset + 13), // idNumber
+            cursor.isNull(offset + 14) ? null : cursor.getString(offset + 14), // workRole
+            cursor.isNull(offset + 15) ? null : cursor.getString(offset + 15) // woreType
         );
         return entity;
     }
@@ -267,6 +293,8 @@ public class AttendanceInfoDao extends AbstractDao<AttendanceInfo, Long> {
         entity.setWorkerCode(cursor.isNull(offset + 11) ? null : cursor.getString(offset + 11));
         entity.setWorkerName(cursor.isNull(offset + 12) ? null : cursor.getString(offset + 12));
         entity.setIdNumber(cursor.isNull(offset + 13) ? null : cursor.getString(offset + 13));
+        entity.setWorkRole(cursor.isNull(offset + 14) ? null : cursor.getString(offset + 14));
+        entity.setWoreType(cursor.isNull(offset + 15) ? null : cursor.getString(offset + 15));
      }
     
     @Override

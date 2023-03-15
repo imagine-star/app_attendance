@@ -13,6 +13,7 @@ class HuNanPublicInfo {
 
         const val SEVER_PORT = "http://218.77.58.14:8765"
         const val GET_STAFF_INFO_BY_SN = "api/device/open/deviceTaskApi/getStaffInfoBySn"
+        const val UPDATE_STATE_BY_ID = "api/device/open/deviceTaskApi/updateStateById"
     }
 
 }

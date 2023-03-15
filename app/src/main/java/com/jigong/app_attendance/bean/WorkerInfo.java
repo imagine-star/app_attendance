@@ -24,15 +24,24 @@ public class WorkerInfo {
     private String idCard;//证件号码(最长 32 字符)
     private String cardType;//(可选)证件类型：0 身份证
     private String birthday;//(可选)生日: 格式 1960-01-31
-    private byte[] picURI;//人员照片 uri 地址
+    private byte[] picURI;//人员照片（字节流）
     private boolean getInfo = false;//是否从平台获取到了工人信息，false未获取到，true已获取到
     private boolean hasPush = false;//是否已上传济工网平台，false未上传，true已上传
+    /*
+    * 湖南新增
+    * */
+    private String isLeader;//是否领导
+    private String workRole;//人员类型
+    private String woreType;//岗位类型
+    private String faceImage;//人员照片（base64）
+    private boolean present = true;//人员是否在场，此字段作为人员是否需要删除凭证，false时删除
 
-    @Generated(hash = 1896473396)
+    @Generated(hash = 1057567392)
     public WorkerInfo(Long id, String customId, String workerId, String workerCode,
             String name, String idNumber, String personType, String gender, String idCard,
-            String cardType, String birthday, byte[] picURI, boolean getInfo,
-            boolean hasPush) {
+            String cardType, String birthday, byte[] picURI, boolean getInfo, boolean hasPush,
+            String isLeader, String workRole, String woreType, String faceImage,
+            boolean present) {
         this.id = id;
         this.customId = customId;
         this.workerId = workerId;
@@ -47,6 +56,11 @@ public class WorkerInfo {
         this.picURI = picURI;
         this.getInfo = getInfo;
         this.hasPush = hasPush;
+        this.isLeader = isLeader;
+        this.workRole = workRole;
+        this.woreType = woreType;
+        this.faceImage = faceImage;
+        this.present = present;
     }
 
     @Generated(hash = 1000580303)
@@ -163,6 +177,46 @@ public class WorkerInfo {
 
     public void setHasPush(boolean hasPush) {
         this.hasPush = hasPush;
+    }
+
+    public String getIsLeader() {
+        return this.isLeader;
+    }
+
+    public void setIsLeader(String isLeader) {
+        this.isLeader = isLeader;
+    }
+
+    public String getWorkRole() {
+        return this.workRole;
+    }
+
+    public void setWorkRole(String workRole) {
+        this.workRole = workRole;
+    }
+
+    public String getWoreType() {
+        return this.woreType;
+    }
+
+    public void setWoreType(String woreType) {
+        this.woreType = woreType;
+    }
+
+    public String getFaceImage() {
+        return this.faceImage;
+    }
+
+    public void setFaceImage(String faceImage) {
+        this.faceImage = faceImage;
+    }
+
+    public boolean getPresent() {
+        return this.present;
+    }
+
+    public void setPresent(boolean present) {
+        this.present = present;
     }
 
 }

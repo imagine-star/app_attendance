@@ -12,6 +12,7 @@ import com.jigong.app_attendance.hunan.HuNanService
 import com.jigong.app_attendance.info.User
 import com.jigong.app_attendance.info.easyPrint
 import com.jigong.app_attendance.info.printAndLog
+import com.jigong.app_attendance.longminggong.LongMingGongService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
@@ -26,7 +27,8 @@ class InfoManageActivity : BaseActivity() {
         binding = ActivityInfoManageBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)
-        initView() //        if (TextUtils.isEmpty(User.getInstance().joinCode)) {
+        initView()
+        //        if (TextUtils.isEmpty(User.getInstance().joinCode)) {
         //            showToastMsgShort("该项目密钥未完善! projectId=" + User.getInstance().projectId + ", projectName=" + User.getInstance().projectName)
         //            return
         //        }
@@ -52,6 +54,7 @@ class InfoManageActivity : BaseActivity() {
         when (User.getInstance().account) {
             "283" -> return Intent(this, FoShanService::class.java)
             "300" -> return Intent(this, HuNanService::class.java)
+            "301" -> return Intent(this, LongMingGongService::class.java)
         }
         return null
     }

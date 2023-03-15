@@ -25,6 +25,7 @@ class SelectPlatformActivity : BaseActivity() {
         setContentView(view)
         platforemList.add(Pair("佛山", "283"))
         platforemList.add(Pair("湖南", "300"))
+        platforemList.add(Pair("陇明公", "301"))
 
         val layoutManager = LinearLayoutManager(this)
         layoutManager.orientation = RecyclerView.VERTICAL

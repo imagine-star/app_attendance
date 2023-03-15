@@ -21,7 +21,13 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.App_attendance"
         android:usesCleartextTraffic="true">
-        <activity android:name=".mainpublic.SelectPlatformActivity"
+        <service
+            android:name=".LongMingGongService"
+            android:enabled="true"
+            android:exported="true"></service>
+
+        <activity
+            android:name=".mainpublic.SelectPlatformActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -33,15 +39,15 @@
         <service
             android:name=".hunan.HuNanService"
             android:enabled="true"
-            android:exported="false"/>
+            android:exported="false" />
         <service
             android:name=".mainpublic.BaseService"
             android:enabled="true"
-            android:exported="false"/>
+            android:exported="false" />
         <service
             android:name=".foshan.FoShanService"
             android:enabled="true"
-            android:exported="false"/>
+            android:exported="false" />
 
         <activity
             android:name=".mainpublic.InfoManageActivity"

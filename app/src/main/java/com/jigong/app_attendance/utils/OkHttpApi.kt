@@ -34,7 +34,7 @@ fun doGet() {
     })
 }
 
-fun doPostJson(header: String, url: String, params: Map<String, String>): String {
+fun doPostJson(header: String, url: String, params: Map<String, Any>): String {
     val jsonData = JSON.toJSON(params)
     val requestBody = jsonData.toString().toRequestBody(TYPE_JSON)
     val okHttpClient = OkHttpClient()

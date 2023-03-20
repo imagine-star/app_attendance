@@ -1,7 +1,9 @@
 package com.jigong.app_attendance.foshan;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 public class HexUtil {
@@ -29,6 +31,7 @@ public class HexUtil {
 
 
 	public static String BinaryToHexString(byte[] bytes) {
+//		System.out.println("图片开始处理时间：" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
 		String hexStr = "0123456789ABCDEF";
 		String result = "";
 		String hex = "";
@@ -37,6 +40,7 @@ public class HexUtil {
 			hex += String.valueOf(hexStr.charAt(b & 0x0F));
 			result += hex ;
 		}
+//		System.out.println("图片结束处理时间：" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
 		return result;
 	}
 

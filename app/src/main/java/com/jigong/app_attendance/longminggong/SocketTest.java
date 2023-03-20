@@ -1,7 +1,7 @@
 package com.jigong.app_attendance.longminggong;
 
 
-import com.jigong.app_attendance.info.PublicTopicAddress;
+import com.jigong.app_attendance.info.GlobalCode;
 
 import java.nio.ByteBuffer;
 import java.util.HashMap;
@@ -25,7 +25,7 @@ public class SocketTest {
     private volatile static Boolean flagTwo = false;
 
     public static void connect() {
-        client = new NioClient(PublicTopicAddress.HOST, PublicTopicAddress.PORT);
+        client = new NioClient(GlobalCode.HOST, GlobalCode.PORT);
     }
 
     public static void listen() {

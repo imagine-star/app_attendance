@@ -3,16 +3,18 @@ package com.jigong.app_attendance.foshan
 import android.content.Intent
 import android.os.IBinder
 import android.text.TextUtils
+import cn.hutool.core.img.ImgUtil
 import cn.hutool.socket.nio.NioClient
 import com.jigong.app_attendance.mainpublic.BaseService
 import com.jigong.app_attendance.mainpublic.MyApplication
 import com.jigong.app_attendance.bean.AttendanceInfo
-import com.jigong.app_attendance.info.PublicTopicAddress
+import com.jigong.app_attendance.info.GlobalCode
 import com.jigong.app_attendance.info.User
 import com.jigong.app_attendance.info.printAndLog
 import com.jigong.app_attendance.utils.JsonUtils
 import com.jigong.app_attendance.utils.checkResult
 import com.jigong.app_attendance.utils.doPostJson
+import com.nanchen.compresshelper.CompressHelper
 import kotlinx.coroutines.*
 import org.json.JSONObject
 import java.io.File
@@ -152,20 +154,26 @@ class FoShanService : BaseService() {
         attendanceList.forEach {
             val workerCode: String = it.workerCode
             val date: String = com.jigong.app_attendance.utils.DateUtils.date2Str(com.jigong.app_attendance.utils.DateUtils.str2Date(it.checkinTime, "yyyy-MM-dd HH:mm:ss"), "yyyyMMddHHmmss")
-            val imageToByte = ConverUtils.netSourceToByte(it.normalSignImage, "GET")
+            val imageToByte = getImageBytes(it.normalSignImage)
             if (TextUtils.isEmpty(workerCode)) {
                 "${it.workerName}身份证号：${it.idNumber}未上传考勤(工人编号未下拉)".printAndLog()
-                return
+                if (!TextUtils.isEmpty(it.normalSignImage)) {
+                    File(GlobalCode.FILE_PATH, it.normalSignImage).delete()
+                }
+                attendanceInfoDao.delete(it)
+                return@forEach
             }
-            if (TextUtils.isEmpty(it.normalSignImage)) {
+            if (TextUtils.isEmpty(it.normalSignImage) || imageToByte == null) {
                 "${it.workerName}身份证号：${it.idNumber}未上传考勤(考勤图片未完善)".printAndLog()
-                return
+                attendanceInfoDao.delete(it)
+                return@forEach
             }
             try {
                 val booleanStringMap = BaseSocket.sendAttendance(workerCode, date, imageToByte, if (it.machineType.equals("02")) clientIn else clientOut)
                 if (booleanStringMap.isEmpty() || booleanStringMap.containsKey(false)) {
                     ("${it.workerName}身份证号：${it.idNumber}，人员考勤上传失败, 平台返回:" + booleanStringMap[false]).printAndLog()
                 } else {
+                    File(GlobalCode.FILE_PATH, it.normalSignImage).delete()
                     attendanceInfoDao.delete(it)
                 }
             } catch (e: Exception) {
@@ -174,12 +182,13 @@ class FoShanService : BaseService() {
         }
     }
 
-    private fun getImageBytes(filePath: String?): ByteArray? {
-        if (filePath.isNullOrEmpty()) {
+    private fun getImageBytes(fileName: String?): ByteArray? {
+        if (fileName.isNullOrEmpty()) {
             return null
         }
         try {
-            val file = File(filePath)
+            val oldFile = File(GlobalCode.FILE_PATH, fileName)
+            val file = CompressHelper.getDefault(this).compressToFile(oldFile);
             var inputStream: FileInputStream? = null
             try {
                 inputStream = FileInputStream(file)
@@ -228,8 +237,8 @@ class FoShanService : BaseService() {
             }
             listMap.add(dataMap)
             map["workerList"] = listMap
-            val pushInfo = doPostJson(PublicTopicAddress.UPLOAD_WORKER_FOSHAN, map)
-            if (checkResult(PublicTopicAddress.UPLOAD_WORKER_FOSHAN, pushInfo)) {
+            val pushInfo = doPostJson(GlobalCode.UPLOAD_WORKER_FOSHAN, map)
+            if (checkResult(GlobalCode.UPLOAD_WORKER_FOSHAN, pushInfo)) {
                 it.hasPush = true
                 workerInfoDao.update(it)
             }
@@ -237,7 +246,7 @@ class FoShanService : BaseService() {
     }
 
     private fun dealAttendanceInfo(infoString: String) {
-        if (checkResult(PublicTopicAddress.QUERY_PROJECT_SIGN_LIST_FOSHAN, infoString)) {
+        if (checkResult(GlobalCode.QUERY_PROJECT_SIGN_LIST_FOSHAN, infoString)) {
             val jsonObject = JSONObject(infoString)
             val entry = JsonUtils.getJSONObject(jsonObject, "entry")
             if (entry != null) {
@@ -256,7 +265,8 @@ class FoShanService : BaseService() {
                             attendanceInfo.deviceSerialNo = JsonUtils.getJsonValue(dataObject, "deviceSerialNo", "")
                             attendanceInfo.idNumber = JsonUtils.getJsonValue(dataObject, "idNumber", "")
                             attendanceInfo.machineType = JsonUtils.getJsonValue(dataObject, "machineType", "")
-                            attendanceInfo.normalSignImage = JsonUtils.getJsonValue(dataObject, "normalSignImage", "")
+                            val imageUrl = JsonUtils.getJsonValue(dataObject, "normalSignImage", "")
+                            attendanceInfo.normalSignImage = ConverUtils.netSourceToFile(imageUrl, "GET")
                             attendanceInfo.projectId = JsonUtils.getJsonValue(dataObject, "projectId", "")
                             attendanceInfo.subcontractorId = JsonUtils.getJsonValue(dataObject, "subcontractorId", "")
                             attendanceInfo.temperature = JsonUtils.getJsonValue(dataObject, "temperature", "")
@@ -277,7 +287,7 @@ class FoShanService : BaseService() {
         map["queryRowId"] = User.getInstance().rowId
         map["signDate"] = User.getInstance().signDate
         map["joinCity"] = User.getInstance().account
-        dealAttendanceInfo(doPostJson(PublicTopicAddress.QUERY_PROJECT_SIGN_LIST_FOSHAN, map))
+        dealAttendanceInfo(doPostJson(GlobalCode.QUERY_PROJECT_SIGN_LIST_FOSHAN, map))
     }
 
     override fun onDestroy() {

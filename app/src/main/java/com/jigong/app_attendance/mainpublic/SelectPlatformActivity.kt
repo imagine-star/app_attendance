@@ -5,7 +5,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import android.widget.LinearLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.jigong.app_attendance.databinding.ActivitySelectPlatformBinding
@@ -32,6 +31,17 @@ class SelectPlatformActivity : BaseActivity() {
         binding.recyclerView.layoutManager = layoutManager
         val adapter = SelectPlatformAdapter(platforemList, this)
         binding.recyclerView.adapter = adapter
+
+//        MyApplication.getApplication().daoSession.attendanceInfoDao.deleteAll()
+//        val attendanceList = MyApplication.getApplication().daoSession.attendanceInfoDao.queryBuilder().list()
+//        User.getInstance().rowId = "0"
+//        User.getInstance().signDate = ""
+
+        if (User.getInstance().login) {
+            startActivity(Intent(this, InfoManageActivity::class.java))
+            finish()
+        }
+
     }
 
     private class SelectPlatformAdapter(val dataList: MutableList<Pair<String, String>>, val context: Context) : RecyclerView.Adapter<SelectPlatformAdapter.MyHolder>() {

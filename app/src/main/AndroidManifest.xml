@@ -22,9 +22,9 @@
         android:theme="@style/Theme.App_attendance"
         android:usesCleartextTraffic="true">
         <service
-            android:name=".LongMingGongService"
+            android:name=".longminggong.LongMingGongService"
             android:enabled="true"
-            android:exported="true"></service>
+            android:exported="true" />
 
         <activity
             android:name=".mainpublic.SelectPlatformActivity"

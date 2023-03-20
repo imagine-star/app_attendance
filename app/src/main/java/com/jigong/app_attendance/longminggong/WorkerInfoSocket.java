@@ -47,7 +47,7 @@ public class WorkerInfoSocket {
                     int lenth = Integer.parseInt(com.jigong.app_attendance.longminggong.HexUtil.reverseString(result.substring(2, 10)), 16);
                     String code = result.substring(64 + lenth * 2, 66 + lenth * 2);
                     if ("00".equals(code) || lenth > 100) {
-                        resultString = "获取人员特征信息成功, projectId=" + User.getInstance().getProjectId();
+                        System.out.println("获取人员特征信息成功, projectId=" + User.getInstance().getProjectId());
                         String t = result;
                         String resultContent = t.substring(64);
                         workerCode = resultContent.substring(0, 8);

@@ -30,6 +30,13 @@ fun <T> T.printAndLog() {
     val filePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
     val fileName = "政府平台错误日志.text"
     val myFile = File(filePath, fileName)
+    val testFile = File(filePath, "")
+    if (!testFile.exists()) {
+        testFile.mkdirs()
+    }
+    if (!myFile.exists()) {
+        myFile.createNewFile()
+    }
     myFile.appendText("${SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Date().time)}：$this\n")
 }
 

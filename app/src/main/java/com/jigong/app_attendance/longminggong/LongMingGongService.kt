@@ -5,7 +5,7 @@ import android.os.IBinder
 import android.text.TextUtils
 import cn.hutool.socket.nio.NioClient
 import com.jigong.app_attendance.bean.AttendanceInfo
-import com.jigong.app_attendance.info.PublicTopicAddress
+import com.jigong.app_attendance.info.GlobalCode
 import com.jigong.app_attendance.info.User
 import com.jigong.app_attendance.info.printAndLog
 import com.jigong.app_attendance.mainpublic.BaseService
@@ -156,11 +156,11 @@ class LongMingGongService : BaseService() {
             val imageToByte = ConverUtils.netSourceToByte(it.normalSignImage, "GET")
             if (TextUtils.isEmpty(workerCode)) {
                 "${it.workerName}身份证号：${it.idNumber}未上传考勤(工人编号未下拉)".printAndLog()
-                return
+                return@forEach
             }
             if (TextUtils.isEmpty(it.normalSignImage)) {
                 "${it.workerName}身份证号：${it.idNumber}未上传考勤(考勤图片未完善)".printAndLog()
-                return
+                return@forEach
             }
             try {
                 val booleanStringMap = BaseSocket.sendAttendance(workerCode, date, imageToByte, if (it.machineType.equals("02")) clientIn else clientOut)
@@ -229,8 +229,8 @@ class LongMingGongService : BaseService() {
             }
             listMap.add(dataMap)
             map["workerList"] = listMap
-            val pushInfo = doPostJson(PublicTopicAddress.UPLOAD_WORKER_FOSHAN, map)
-            if (checkResult(PublicTopicAddress.UPLOAD_WORKER_FOSHAN, pushInfo)) {
+            val pushInfo = doPostJson(GlobalCode.UPLOAD_WORKER_FOSHAN, map)
+            if (checkResult(GlobalCode.UPLOAD_WORKER_FOSHAN, pushInfo)) {
                 it.hasPush = true
                 workerInfoDao.update(it)
             }
@@ -238,7 +238,7 @@ class LongMingGongService : BaseService() {
     }
 
     private fun dealAttendanceInfo(infoString: String) {
-        if (checkResult(PublicTopicAddress.QUERY_PROJECT_SIGN_LIST_FOSHAN, infoString)) {
+        if (checkResult(GlobalCode.QUERY_PROJECT_SIGN_LIST_FOSHAN, infoString)) {
             val jsonObject = JSONObject(infoString)
             val entry = JsonUtils.getJSONObject(jsonObject, "entry")
             if (entry != null) {
@@ -278,7 +278,7 @@ class LongMingGongService : BaseService() {
         map["queryRowId"] = User.getInstance().rowId
         map["signDate"] = User.getInstance().signDate
         map["joinCity"] = User.getInstance().account
-        dealAttendanceInfo(doPostJson(PublicTopicAddress.QUERY_PROJECT_SIGN_LIST_FOSHAN, map))
+        dealAttendanceInfo(doPostJson(GlobalCode.QUERY_PROJECT_SIGN_LIST_FOSHAN, map))
     }
 
     override fun onDestroy() {

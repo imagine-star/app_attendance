@@ -15,7 +15,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.jigong.app_attendance.databinding.ActivityMainBinding;
-import com.jigong.app_attendance.info.PublicTopicAddress;
+import com.jigong.app_attendance.info.GlobalCode;
 import com.jigong.app_attendance.info.User;
 import com.jigong.app_attendance.utils.CheckUtilsKt;
 import com.jigong.app_attendance.utils.JsonUtils;
@@ -47,7 +47,6 @@ public class MainActivity extends BaseActivity {
             finish();
         } else {
             binding.login.setOnClickListener(view1 -> {
-                binding.login.setOnClickListener(null);
                 doNext();
             });
         }
@@ -58,6 +57,7 @@ public class MainActivity extends BaseActivity {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0x66);
         } else {
             loadData();
+            binding.login.setOnClickListener(null);
         }
     }
 
@@ -97,7 +97,7 @@ public class MainActivity extends BaseActivity {
                 map.put("joinCity", binding.userName.getText().toString().trim());
                 map.put("secret", "1" + binding.passWard.getText().toString().trim() + new Date().getTime());
                 map.put("sn", getDeviceSN());
-                return OkHttpApiKt.doPostJson(PublicTopicAddress.LOGIN_FOSHAN, map);
+                return OkHttpApiKt.doPostJson(GlobalCode.LOGIN_FOSHAN, map);
             }
 
             @Override
@@ -108,7 +108,7 @@ public class MainActivity extends BaseActivity {
                         JSONObject jsonObject = new JSONObject(result);
                         JSONObject entry = JsonUtils.getJSONObject(jsonObject, "entry");
                         String respMsg = JsonUtils.getJsonValue(entry, "respMsg", "");
-                        if (CheckUtilsKt.checkResult(PublicTopicAddress.LOGIN_FOSHAN, result)) {
+                        if (CheckUtilsKt.checkResult(GlobalCode.LOGIN_FOSHAN, result)) {
                             User.getInstance().setLogin(true);
                             JSONObject dataObject = JsonUtils.getJSONObject(entry, "result");
 
@@ -151,7 +151,6 @@ public class MainActivity extends BaseActivity {
                     showToastMsgShort("网络错误");
                 }
                 binding.login.setOnClickListener(view1 -> {
-                    binding.login.setOnClickListener(null);
                     doNext();
                 });
             }

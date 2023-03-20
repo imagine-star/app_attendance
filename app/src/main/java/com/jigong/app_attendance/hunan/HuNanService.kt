@@ -5,15 +5,13 @@ import android.os.IBinder
 import com.jigong.app_attendance.bean.AttendanceInfo
 import com.jigong.app_attendance.bean.WorkerInfo
 import com.jigong.app_attendance.greendao.WorkerInfoDao
-import com.jigong.app_attendance.info.PublicTopicAddress
+import com.jigong.app_attendance.info.GlobalCode
 import com.jigong.app_attendance.info.User
-import com.jigong.app_attendance.info.easyPrint
 import com.jigong.app_attendance.info.printAndLog
 import com.jigong.app_attendance.mainpublic.BaseService
 import com.jigong.app_attendance.mainpublic.MyApplication
 import com.jigong.app_attendance.utils.*
 import kotlinx.coroutines.*
-import org.json.JSONArray
 import org.json.JSONObject
 import java.util.ArrayList
 import java.util.Date
@@ -120,11 +118,11 @@ class HuNanService : BaseService() {
         map["queryRowId"] = User.getInstance().rowId
         map["signDate"] = User.getInstance().signDate
         map["joinCity"] = User.getInstance().account
-        dealAttendanceInfo(doPostJson(PublicTopicAddress.QUERY_PROJECT_SIGN_LIST_FOSHAN, map))
+        dealAttendanceInfo(doPostJson(GlobalCode.QUERY_PROJECT_SIGN_LIST_FOSHAN, map))
     }
 
     private fun dealAttendanceInfo(infoString: String) {
-        if (checkResult(PublicTopicAddress.QUERY_PROJECT_SIGN_LIST_FOSHAN, infoString)) {
+        if (checkResult(GlobalCode.QUERY_PROJECT_SIGN_LIST_FOSHAN, infoString)) {
             val jsonObject = JSONObject(infoString)
             val entry = JsonUtils.getJSONObject(jsonObject, "entry")
             if (entry != null) {
@@ -184,8 +182,8 @@ class HuNanService : BaseService() {
             }
             listMap.add(dataMap)
             map["workerList"] = listMap
-            val pushInfo = doPostJson(PublicTopicAddress.UPLOAD_WORKER_FOSHAN, map)
-            if (checkResult(PublicTopicAddress.UPLOAD_WORKER_FOSHAN, pushInfo)) {
+            val pushInfo = doPostJson(GlobalCode.UPLOAD_WORKER_FOSHAN, map)
+            if (checkResult(GlobalCode.UPLOAD_WORKER_FOSHAN, pushInfo)) {
                 it.hasPush = true
                 workerInfoDao.update(it)
             }

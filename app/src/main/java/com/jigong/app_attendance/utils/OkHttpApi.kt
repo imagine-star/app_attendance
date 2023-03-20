@@ -2,7 +2,7 @@ package com.jigong.app_attendance.utils
 
 import android.annotation.SuppressLint
 import com.alibaba.fastjson.JSON
-import com.jigong.app_attendance.info.PublicTopicAddress
+import com.jigong.app_attendance.info.GlobalCode
 import com.jigong.app_attendance.info.User
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
@@ -58,7 +58,7 @@ fun doPostJson(header: String, url: String, params: Map<String, Any>): String {
 
 @SuppressLint("HardwareIds")
 fun doPostJson(url: String, params: Map<String, Any>): String {
-    val targetUrl = PublicTopicAddress.HTTP_SERVER + url
+    val targetUrl = GlobalCode.HTTP_SERVER + url
     val jsonData = JSON.toJSON(params)
     val requestBody = jsonData.toString().toRequestBody(TYPE_JSON)
     val okHttpClient = OkHttpClient()

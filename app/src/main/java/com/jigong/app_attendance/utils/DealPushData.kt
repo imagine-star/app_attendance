@@ -2,7 +2,7 @@ package com.jigong.app_attendance.utils
 
 import android.text.TextUtils
 import com.jigong.app_attendance.bean.AttendanceInfo
-import com.jigong.app_attendance.info.PublicTopicAddress
+import com.jigong.app_attendance.info.GlobalCode
 import com.jigong.app_attendance.info.User
 import java.io.BufferedReader
 import java.io.IOException
@@ -30,7 +30,7 @@ fun getOnlineDataMap(deviceNo: String): Map<String, Any> {
         Pair("time", SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Date()))
     )
     val operator = "Online"
-    val sign = SignTest.getSign(0, PublicTopicAddress.BASIC_PUSH + operator + deviceNo)
+    val sign = SignTest.getSign(0, GlobalCode.BASIC_PUSH + operator + deviceNo)
     return mapOf(
         Pair("operator", operator),
         Pair("clientSign", sign),
@@ -47,7 +47,7 @@ fun getHeartbeatDataMap(deviceNo: String): Map<String, Any> {
         Pair("time", SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Date()))
     )
     val operator = "HeartBeat"
-    val sign = SignTest.getSign(0, PublicTopicAddress.BASIC_PUSH + operator + deviceNo)
+    val sign = SignTest.getSign(0, GlobalCode.BASIC_PUSH + operator + deviceNo)
     return mapOf(
         Pair("operator", operator),
         Pair("clientSign", sign),
@@ -63,7 +63,7 @@ fun getOfflineDataMap(deviceNo: String): Map<String, Any> {
         Pair("facesluiceId", deviceNo)
     )
     val operator = "Offline"
-    val sign = SignTest.getSign(0, PublicTopicAddress.BASIC_PUSH + operator + deviceNo)
+    val sign = SignTest.getSign(0, GlobalCode.BASIC_PUSH + operator + deviceNo)
     return mapOf(
         Pair("operator", operator),
         Pair("clientSign", sign),
@@ -123,8 +123,8 @@ fun getAttendanceDataMap(deviceNo: String, attendanceInfo: AttendanceInfo): Map<
     )
     val operator = "RecPush"
     val sign = SignTest.getSign(
-        0,
-        PublicTopicAddress.TOPIC_PREFIX + deviceNo + "/Rec" +
+            0,
+            GlobalCode.TOPIC_PREFIX + deviceNo + "/Rec" +
                 operator + attendanceInfo.idNumber + attendanceInfo.attendanceId + deviceNo + attendanceInfo.checkinTime +
                 if (TextUtils.isEmpty(attendanceInfo.normalSignImage)) "0" else "1"
     )

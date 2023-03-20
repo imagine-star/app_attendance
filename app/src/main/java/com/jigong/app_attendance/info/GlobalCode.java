@@ -1,14 +1,21 @@
 package com.jigong.app_attendance.info;
 
+import android.os.Environment;
+
 /**
  * @Author LiuHaoQi
  * @Description
  * @Date 2022/11/10 13:51
  */
-public class PublicTopicAddress {
+public class GlobalCode {
 
     public static final String HOST = "219.130.221.10";
     public static final int PORT = 20028;
+    
+    /*
+    * 考勤图片储存地址
+    * */
+    public static final String FILE_PATH = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + "/attendance";
 
     /*
      * 济工网平台请求前缀

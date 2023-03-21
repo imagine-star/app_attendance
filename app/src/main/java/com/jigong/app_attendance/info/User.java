@@ -7,19 +7,19 @@ package com.jigong.app_attendance.info;
  */
 public class User {
 
-    private final String USER_NAME = "USER_NAME";
-    private final String PASS_WORD = "PASS_WORD";
-    private final String IN_DEVICE_NO = "IN_DEVICE_NO";
-    private final String OUT_DEVICE_NO = "OUT_DEVICE_NO";
-    private final String PROJECT_ID = "PROJECT_ID";
-    private final String PROJECT_NAME = "PROJECT_NAME";
-    private final String IN_ONLINE = "IN_ONLINE";
-    private final String OUT_ONLINE = "OUT_ONLINE";
-    private final String LOGIN = "LOGIN";
-    private final String ACCOUNT = "ACCOUNT";
-    private final String ROWID = "ROWID";
-    private final String SIGN_DATE = "SIGN_DATE";
-    private final String GOMEET_TOKEN = "GOMEET_TOKEN";
+    private final String userName = "userName";
+    private final String password = "password";
+    private final String inDeviceNo = "inDeviceNo";
+    private final String outDeviceNo = "outDeviceNo";
+    private final String projectId = "projectId";
+    private final String projectName = "projectName";
+    private final String inOnline = "inOnline";
+    private final String outOnline = "outOnline";
+    private final String login = "login";
+    private final String account = "account";
+    private final String rowId = "rowId";
+    private final String signDate = "signDate";
+    private final String gomeetToken = "gomeetToken";
     private final String joinCode = "joinCode";
     private final String joinPassword = "joinPassword";
     private final String joinProject = "joinProject";
@@ -61,27 +61,27 @@ public class User {
     }
 
     public String getSignDate() {
-        return mPreferences.getStringValue(SIGN_DATE, "");
+        return mPreferences.getStringValue(signDate, "");
     }
 
     public void setSignDate(String signDate) {
-        mPreferences.setStringValue(SIGN_DATE, signDate);
+        mPreferences.setStringValue(this.signDate, signDate);
     }
 
     public String getRowId() {
-        return mPreferences.getStringValue(ROWID, "0");
+        return mPreferences.getStringValue(rowId, "0");
     }
 
     public void setRowId(String rowId) {
-        mPreferences.setStringValue(ROWID, rowId);
+        mPreferences.setStringValue(this.rowId, rowId);
     }
 
     public String getAccount() {
-        return mPreferences.getStringValue(ACCOUNT);
+        return mPreferences.getStringValue(account);
     }
 
     public void setAccount(String account) {
-        mPreferences.setStringValue(ACCOUNT, account);
+        mPreferences.setStringValue(this.account, account);
     }
 
     public String getJoinCode() {
@@ -93,89 +93,89 @@ public class User {
     }
 
     public boolean getLogin() {
-        return mPreferences.getBooleanValue(LOGIN, false);
+        return mPreferences.getBooleanValue(login, false);
     }
 
     public void setLogin(boolean login) {
-        mPreferences.setBooleanValue(LOGIN, login);
+        mPreferences.setBooleanValue(this.login, login);
     }
 
     public boolean getInOnline() {
-        return mPreferences.getBooleanValue(IN_ONLINE, false);
+        return mPreferences.getBooleanValue(inOnline, false);
     }
 
     public void setInOnline(boolean inOnline) {
-        mPreferences.setBooleanValue(IN_ONLINE, inOnline);
+        mPreferences.setBooleanValue(this.inOnline, inOnline);
         if (inOnlineChangeListener != null) {
             inOnlineChangeListener.onChange();
         }
     }
 
     public boolean getOutOnline() {
-        return mPreferences.getBooleanValue(OUT_ONLINE, false);
+        return mPreferences.getBooleanValue(outOnline, false);
     }
 
     public void setOutOnline(boolean outOnline) {
-        mPreferences.setBooleanValue(OUT_ONLINE, outOnline);
+        mPreferences.setBooleanValue(this.outOnline, outOnline);
         if (outOnlineChangeListener != null) {
             outOnlineChangeListener.onChange();
         }
     }
 
     public String getProjectName() {
-        return mPreferences.getStringValue(PROJECT_NAME);
+        return mPreferences.getStringValue(projectName);
     }
 
     public void setProjectName(String projectName) {
-        mPreferences.setStringValue(PROJECT_NAME, projectName);
+        mPreferences.setStringValue(this.projectName, projectName);
     }
 
     public String getProjectId() {
-        return mPreferences.getStringValue(PROJECT_ID);
+        return mPreferences.getStringValue(projectId);
     }
 
     public void setProjectId(String projectId) {
-        mPreferences.setStringValue(PROJECT_ID, projectId);
+        mPreferences.setStringValue(this.projectId, projectId);
     }
 
     public String getInDeviceNo() {
-        return mPreferences.getStringValue(IN_DEVICE_NO);
+        return mPreferences.getStringValue(inDeviceNo);
     }
 
     public void setInDeviceNo(String inDeviceNo) {
-        mPreferences.setStringValue(IN_DEVICE_NO, inDeviceNo);
+        mPreferences.setStringValue(this.inDeviceNo, inDeviceNo);
     }
 
     public String getOutDeviceNo() {
-        return mPreferences.getStringValue(OUT_DEVICE_NO);
+        return mPreferences.getStringValue(outDeviceNo);
     }
 
     public void setOutDeviceNo(String outDeviceNo) {
-        mPreferences.setStringValue(OUT_DEVICE_NO, outDeviceNo);
+        mPreferences.setStringValue(this.outDeviceNo, outDeviceNo);
     }
 
     public String getUserName() {
-        return mPreferences.getStringValue(USER_NAME);
+        return mPreferences.getStringValue(userName);
     }
 
     public void setUserName(String userName) {
-        mPreferences.setStringValue(USER_NAME, userName);
+        mPreferences.setStringValue(this.userName, userName);
     }
 
     public String getPassWord() {
-        return mPreferences.getStringValue(PASS_WORD);
+        return mPreferences.getStringValue(password);
     }
 
     public void setPassWord(String passWord) {
-        mPreferences.setStringValue(PASS_WORD, passWord);
+        mPreferences.setStringValue(password, passWord);
     }
 
     public void setGomeetToken(String gomeetToken) {
-        mPreferences.setStringValue(GOMEET_TOKEN, gomeetToken);
+        mPreferences.setStringValue(this.gomeetToken, gomeetToken);
     }
 
     public String getGomeetToken() {
-        return mPreferences.getStringValue(GOMEET_TOKEN);
+        return mPreferences.getStringValue(gomeetToken);
     }
 
     public String getJoinPassword() {

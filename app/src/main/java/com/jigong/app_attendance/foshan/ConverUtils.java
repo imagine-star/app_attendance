@@ -1,5 +1,6 @@
 package com.jigong.app_attendance.foshan;
 
+import android.text.TextUtils;
 import android.util.Base64;
 
 import com.jigong.app_attendance.info.GlobalCode;
@@ -84,6 +85,9 @@ public class ConverUtils {
     }
 
     public static String netSourceToFile(String srcUrl, String requestMethod) {
+        if (TextUtils.isEmpty(srcUrl)) {
+            return null;
+        }
         ByteArrayOutputStream outPut = new ByteArrayOutputStream();
         byte[] data = new byte[1024 * 8];
         try {

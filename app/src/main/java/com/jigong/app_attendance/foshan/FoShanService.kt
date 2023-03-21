@@ -188,6 +188,9 @@ class FoShanService : BaseService() {
         }
         try {
             val oldFile = File(GlobalCode.FILE_PATH, fileName)
+            if (!oldFile.exists()) {
+                return null
+            }
             val file = CompressHelper.getDefault(this).compressToFile(oldFile);
             var inputStream: FileInputStream? = null
             try {
@@ -266,7 +269,11 @@ class FoShanService : BaseService() {
                             attendanceInfo.idNumber = JsonUtils.getJsonValue(dataObject, "idNumber", "")
                             attendanceInfo.machineType = JsonUtils.getJsonValue(dataObject, "machineType", "")
                             val imageUrl = JsonUtils.getJsonValue(dataObject, "normalSignImage", "")
-                            attendanceInfo.normalSignImage = ConverUtils.netSourceToFile(imageUrl, "GET")
+                            if (!imageUrl.isNullOrEmpty()) {
+                                attendanceInfo.normalSignImage = ConverUtils.netSourceToFile(imageUrl, "GET")
+                            } else {
+                                attendanceInfo.normalSignImage = ""
+                            }
                             attendanceInfo.projectId = JsonUtils.getJsonValue(dataObject, "projectId", "")
                             attendanceInfo.subcontractorId = JsonUtils.getJsonValue(dataObject, "subcontractorId", "")
                             attendanceInfo.temperature = JsonUtils.getJsonValue(dataObject, "temperature", "")

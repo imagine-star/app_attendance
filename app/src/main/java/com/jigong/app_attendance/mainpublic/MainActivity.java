@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Toast;
@@ -24,6 +25,7 @@ import com.jigong.app_attendance.utils.OkHttpApiKt;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -39,6 +41,22 @@ public class MainActivity extends BaseActivity {
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         View view = binding.getRoot();
         setContentView(view);
+
+        if (User.getInstance().getDeleteTime() == 0) {
+            User.getInstance().setDeleteTime(new Date().getTime());
+        }
+        if (new Date().getTime() - User.getInstance().getDeleteTime() > 86400000 * 7) {
+            File filePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS);
+            String fileName = "政府平台错误日志.text";
+            File myFile = new  File(filePath, fileName);
+            if (myFile.exists()) {
+                boolean deleteFlag = myFile.delete();
+                if (deleteFlag) {
+                    User.getInstance().setDeleteTime(new Date().getTime());
+                }
+            }
+        }
+
         User.getInstance().setInOnline(false);
         User.getInstance().setOutOnline(false);
         binding.userName.setText(User.getInstance().getJoinCity());

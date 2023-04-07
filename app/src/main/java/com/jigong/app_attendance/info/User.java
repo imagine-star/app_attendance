@@ -1,5 +1,7 @@
 package com.jigong.app_attendance.info;
 
+import java.util.Date;
+
 /**
  * @Author LiuHaoQi
  * @Description
@@ -27,6 +29,8 @@ public class User {
     private final String joinPlatform = "joinPlatform";
     private final String developKey = "developKey";
     private final String developSecret = "developSecret";
+
+    private final String deleteTime = "deleteTime";
 
     private final SavedSharedPreferences mPreferences;
 
@@ -224,6 +228,14 @@ public class User {
 
     public void setDevelopSecret(String developSecret) {
         mPreferences.setStringValue(this.developSecret, developSecret);
+    }
+
+    public Long getDeleteTime() {
+        return mPreferences.getLongValue(developSecret, 0);
+    }
+
+    public void setDeleteTime(Long deleteTime) {
+        mPreferences.setLongValue(this.deleteTime, deleteTime);
     }
 
     public void clearAll() {

@@ -32,7 +32,13 @@ public class SocketTest {
         client.setChannelHandler((sc) -> {
             ByteBuffer readBuffer = ByteBuffer.allocate(1024);
             //从channel读数据到缓冲区
-            int readBytes = sc.read(readBuffer);
+            int readBytes = 0;
+            try {
+                readBytes = sc.read(readBuffer);
+            } catch (Exception e) {
+                e.printStackTrace();
+                return;
+            }
             if (readBytes > 0) {
                 readBuffer.flip();
                 byte[] bytes = new byte[readBuffer.remaining()];

@@ -44,7 +44,9 @@ class InfoManageActivity : BaseActivity() {
         if (intent != null) {
             startService(intent)
         } else {
-            "启动服务失败".printAndLog()
+            showToastMsgShort("启动服务失败，未选择平台")
+            startActivity(Intent(this, SelectPlatformActivity::class.java))
+            finish()
         }
     }
 

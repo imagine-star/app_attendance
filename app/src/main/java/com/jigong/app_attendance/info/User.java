@@ -16,7 +16,7 @@ public class User {
     private final String inOnline = "inOnline";
     private final String outOnline = "outOnline";
     private final String login = "login";
-    private final String account = "account";
+    private final String joinCity = "joinCity";
     private final String rowId = "rowId";
     private final String signDate = "signDate";
     private final String gomeetToken = "gomeetToken";
@@ -76,12 +76,12 @@ public class User {
         mPreferences.setStringValue(this.rowId, rowId);
     }
 
-    public String getAccount() {
-        return mPreferences.getStringValue(account);
+    public String getJoinCity() {
+        return mPreferences.getStringValue(joinCity);
     }
 
-    public void setAccount(String account) {
-        mPreferences.setStringValue(this.account, account);
+    public void setJoinCity(String joinCity) {
+        mPreferences.setStringValue(this.joinCity, joinCity);
     }
 
     public String getJoinCode() {

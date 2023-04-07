@@ -217,7 +217,7 @@ class LongMingGongService : BaseService() {
                 return@forEach
             }
             val map = HashMap<String, Any>()
-            map["joinCity"] = User.getInstance().account
+            map["joinCity"] = User.getInstance().joinCity
             map["projectId"] = User.getInstance().projectId
             val listMap = ArrayList<Map<String, Any>>()
             val dataMap = HashMap<String, Any>()
@@ -277,7 +277,7 @@ class LongMingGongService : BaseService() {
         map["projectId"] = User.getInstance().projectId
         map["queryRowId"] = User.getInstance().rowId
         map["signDate"] = User.getInstance().signDate
-        map["joinCity"] = User.getInstance().account
+        map["joinCity"] = User.getInstance().joinCity
         dealAttendanceInfo(doPostJson(GlobalCode.QUERY_PROJECT_SIGN_LIST_FOSHAN, map))
     }
 

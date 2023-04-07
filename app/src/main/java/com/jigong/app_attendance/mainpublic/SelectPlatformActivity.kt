@@ -42,6 +42,8 @@ class SelectPlatformActivity : BaseActivity() {
             finish()
         }
 
+//        startService(Intent(this, FoShanService::class.java))
+
     }
 
     private class SelectPlatformAdapter(val dataList: MutableList<Pair<String, String>>, val context: Context) : RecyclerView.Adapter<SelectPlatformAdapter.MyHolder>() {
@@ -62,7 +64,7 @@ class SelectPlatformActivity : BaseActivity() {
         override fun onBindViewHolder(holder: MyHolder, position: Int) {
             holder.itemBinding.platformName.text = dataList[position].first
             holder.itemBinding.platformName.setOnClickListener {
-                User.getInstance().account = dataList[position].second
+                User.getInstance().joinCity = dataList[position].second
                 context.startActivity(Intent(context, MainActivity::class.java))
                 (context as SelectPlatformActivity).finish()
             }

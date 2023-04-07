@@ -41,7 +41,7 @@ public class MainActivity extends BaseActivity {
         setContentView(view);
         User.getInstance().setInOnline(false);
         User.getInstance().setOutOnline(false);
-        binding.userName.setText(User.getInstance().getAccount());
+        binding.userName.setText(User.getInstance().getJoinCity());
         if (User.getInstance().getLogin()) {
             startActivity(new Intent(MainActivity.this, InfoManageActivity.class));
             finish();

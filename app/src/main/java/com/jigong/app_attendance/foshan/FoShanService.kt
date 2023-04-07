@@ -3,7 +3,6 @@ package com.jigong.app_attendance.foshan
 import android.content.Intent
 import android.os.IBinder
 import android.text.TextUtils
-import cn.hutool.core.img.ImgUtil
 import cn.hutool.socket.nio.NioClient
 import com.jigong.app_attendance.mainpublic.BaseService
 import com.jigong.app_attendance.mainpublic.MyApplication
@@ -36,6 +35,7 @@ class FoShanService : BaseService() {
     private val time3: Long = 1000 * 60 * 3
     private val time5: Long = 1000 * 60 * 5
     private val time30: Long = 1000 * 60 * 60
+    private val timeLogin: Long = 1000 * 60 * 60 * 2
 
     @DelicateCoroutinesApi
     override fun onCreate() {
@@ -64,11 +64,17 @@ class FoShanService : BaseService() {
                 if (nioClientIn != null) User.getInstance().inOnline = true
                 if (nioClientOut != null) User.getInstance().outOnline = true
                 if (nioClientIn != null && nioClientOut != null) {
-                    println("平台上线请求成功")
-                    println("平台上线结束，开始进行数据处理")
                     break
                 }
             }
+            timer.schedule(object : TimerTask() {
+                override fun run() {
+                    try {
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
+            }, timeLogin, timeLogin)
             /*
             * 向平台发送心跳，5分钟左右一次
             * */
@@ -228,7 +234,7 @@ class FoShanService : BaseService() {
                 return@forEach
             }
             val map = HashMap<String, Any>()
-            map["joinCity"] = User.getInstance().account
+            map["joinCity"] = User.getInstance().joinCity
             map["projectId"] = User.getInstance().projectId
             val listMap = ArrayList<Map<String, Any>>()
             val dataMap = HashMap<String, Any>()
@@ -293,7 +299,7 @@ class FoShanService : BaseService() {
         map["projectId"] = User.getInstance().projectId
         map["queryRowId"] = User.getInstance().rowId
         map["signDate"] = User.getInstance().signDate
-        map["joinCity"] = User.getInstance().account
+        map["joinCity"] = User.getInstance().joinCity
         dealAttendanceInfo(doPostJson(GlobalCode.QUERY_PROJECT_SIGN_LIST_FOSHAN, map))
     }
 

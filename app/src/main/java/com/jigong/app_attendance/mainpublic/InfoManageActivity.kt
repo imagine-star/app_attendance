@@ -3,14 +3,12 @@ package com.jigong.app_attendance.mainpublic
 import android.content.Intent
 import android.os.Bundle
 import android.os.Environment
-import android.text.TextUtils
 import androidx.lifecycle.lifecycleScope
 import com.jigong.app_attendance.databinding.ActivityInfoManageBinding
 import com.jigong.app_attendance.foshan.*
 import com.jigong.app_attendance.greendao.DaoMaster
 import com.jigong.app_attendance.hunan.HuNanService
 import com.jigong.app_attendance.info.User
-import com.jigong.app_attendance.info.easyPrint
 import com.jigong.app_attendance.info.printAndLog
 import com.jigong.app_attendance.longminggong.LongMingGongService
 import kotlinx.coroutines.Dispatchers
@@ -51,7 +49,7 @@ class InfoManageActivity : BaseActivity() {
     }
 
     private fun getServiceIntent(): Intent? {
-        when (User.getInstance().account) {
+        when (User.getInstance().joinCity) {
             "283" -> return Intent(this, FoShanService::class.java)
             "300" -> return Intent(this, HuNanService::class.java)
             "301" -> return Intent(this, LongMingGongService::class.java)

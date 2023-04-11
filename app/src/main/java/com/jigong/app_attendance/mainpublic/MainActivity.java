@@ -139,8 +139,7 @@ public class MainActivity extends BaseActivity {
                             User.getInstance().setProjectName(projectName);
                             User.getInstance().setGomeetToken(gomeetToken);
 
-                            User.getInstance().setInDeviceNo(projectId);//进场设备sn
-                            User.getInstance().setOutDeviceNo(projectId.substring(0, 8) + "1");//出场设备sn
+                            setDevice(projectId);
 
                             String joinCode = JsonUtils.getJsonValue(dataObject, "joinCode", "");
                             String joinPassword = JsonUtils.getJsonValue(dataObject, "joinPassword", "");
@@ -173,6 +172,20 @@ public class MainActivity extends BaseActivity {
                 });
             }
         }.execute();
+    }
+
+    public void setDevice(String projectId) {
+        switch (User.getInstance().getJoinCity()) {
+            case "283":
+                User.getInstance().setInDeviceNo(projectId);//进场设备sn
+                User.getInstance().setOutDeviceNo(projectId.substring(0, 8) + "1");//出场设备sn
+                break;
+            case "306":
+                User.getInstance().setCollectionDevice(projectId);
+                User.getInstance().setInDeviceNo(projectId.substring(0, 8) + "0");//进场设备sn
+                User.getInstance().setOutDeviceNo(projectId.substring(0, 8) + "1");//出场设备sn
+                break;
+        }
     }
 
 }

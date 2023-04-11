@@ -28,6 +28,17 @@ fun checkResult(title: String, result: String): Boolean {
     }
     return false
 }
+/*
+* 返回值检验
+* */
+fun getMsg(result: String): String {
+    if (!TextUtils.isEmpty(result)) {
+        val jsonObject = JSONObject(result)
+        val entry = JsonUtils.getJSONObject(jsonObject, "entry")
+        return JsonUtils.getJsonValue(entry, "respMsg", "")
+    }
+    return ""
+}
 
 /*
 * 返回值检验

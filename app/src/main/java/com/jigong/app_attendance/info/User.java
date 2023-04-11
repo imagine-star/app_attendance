@@ -11,6 +11,7 @@ public class User {
 
     private final String userName = "userName";
     private final String password = "password";
+    private final String collectionDevice = "collectionDevice";
     private final String inDeviceNo = "inDeviceNo";
     private final String outDeviceNo = "outDeviceNo";
     private final String projectId = "projectId";
@@ -236,6 +237,14 @@ public class User {
 
     public void setDeleteTime(Long deleteTime) {
         mPreferences.setLongValue(this.deleteTime, deleteTime);
+    }
+
+    public String getCollectionDevice() {
+        return mPreferences.getStringValue(collectionDevice);
+    }
+
+    public void setCollectionDevice(String collectionDevice) {
+        mPreferences.setStringValue(this.collectionDevice, collectionDevice);
     }
 
     public void clearAll() {

@@ -23,6 +23,7 @@ class SelectPlatformActivity : BaseActivity() {
         val view = binding.root
         setContentView(view)
         platforemList.add(Pair("佛山", "283"))
+        platforemList.add(Pair("眉山", "306"))
 //        platforemList.add(Pair("湖南", "300"))
 //        platforemList.add(Pair("陇明公", "301"))
 

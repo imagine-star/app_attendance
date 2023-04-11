@@ -11,10 +11,10 @@ public class GlobalCode {
 
     public static final String HOST = "219.130.221.10";
     public static final int PORT = 20028;
-    
+
     /*
-    * 考勤图片储存地址
-    * */
+     * 考勤图片储存地址
+     * */
     public static final String FILE_PATH = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + "/attendance";
 
     /*
@@ -28,17 +28,22 @@ public class GlobalCode {
     public static String HTTP_SERVER = SERVER + GOMEET;
 
     /*
-     *济工网平台登录
+     * 济工网平台登录
      * */
     public static String LOGIN_FOSHAN = "webapi/handPad/platform/noProjectLogin/v1";
 
     /*
-     *济工网平台上传工人信息
+     * 济工网平台上传工人信息
      * */
     public static String UPLOAD_WORKER_FOSHAN = "api/worker/uploadWorker/v1";
 
     /*
-     *项目考勤查询
+     * 济工网平台上传工人信息退场
+     * */
+    public static String OUT_PROJECT_WORKER = "api/worker/outProjectWorker/v1";
+
+    /*
+     * 项目考勤查询
      * */
     public static String QUERY_PROJECT_SIGN_LIST_FOSHAN = "api/sign/queryProjectSignList/v1";
 

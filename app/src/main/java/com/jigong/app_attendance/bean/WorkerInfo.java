@@ -35,6 +35,13 @@ public class WorkerInfo {
     private String woreType;//岗位类型
     private String faceImage;//人员照片（base64）
     private boolean present = true;//人员是否在场，此字段作为人员是否需要删除凭证，false时删除
+    /*
+    * 眉山新增
+    * */
+    private String nation;//民族
+    private String idissue;//发证机关
+    private String idperiod;//证件有效期
+    private String idphoto;//身份证照片
 
     @Generated(hash = 1057567392)
     public WorkerInfo(Long id, String customId, String workerId, String workerCode,

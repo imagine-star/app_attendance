@@ -31,7 +31,7 @@ class HuNanService : BaseService() {
     @DelicateCoroutinesApi
     override fun onCreate() {
         super.onCreate()
-        "服务已开始，协程空间已注册".printAndLog()
+        "服务已开始".printAndLog()
         mainScope.launch(Dispatchers.Main) {
             run()
         }
@@ -299,7 +299,7 @@ class HuNanService : BaseService() {
 
     override fun onDestroy() {
         mainScope.cancel()
-        "服务已销毁，协程空间已注销".printAndLog()
+        "服务已销毁".printAndLog()
         super.onDestroy()
     }
 

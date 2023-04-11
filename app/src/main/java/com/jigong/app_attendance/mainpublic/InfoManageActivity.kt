@@ -11,6 +11,7 @@ import com.jigong.app_attendance.hunan.HuNanService
 import com.jigong.app_attendance.info.User
 import com.jigong.app_attendance.info.printAndLog
 import com.jigong.app_attendance.longminggong.LongMingGongService
+import com.jigong.app_attendance.meishan.MeiShanService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
@@ -55,6 +56,7 @@ class InfoManageActivity : BaseActivity() {
             "283" -> return Intent(this, FoShanService::class.java)
             "300" -> return Intent(this, HuNanService::class.java)
             "301" -> return Intent(this, LongMingGongService::class.java)
+            "306" -> return Intent(this, MeiShanService::class.java)
         }
         return null
     }

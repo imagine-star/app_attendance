@@ -22,6 +22,10 @@
         android:theme="@style/Theme.App_attendance"
         android:usesCleartextTraffic="true">
         <service
+            android:name=".MeiShanService"
+            android:enabled="true"
+            android:exported="true"></service>
+        <service
             android:name=".longminggong.LongMingGongService"
             android:enabled="true"
             android:exported="true" />

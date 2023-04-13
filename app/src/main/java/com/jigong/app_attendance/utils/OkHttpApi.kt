@@ -81,6 +81,27 @@ fun doPostJson(header: String, url: String, params: Map<String, Any>): String {
     return ""
 }
 
+fun doPostJsonNoHeader(url: String, params: Map<String, Any>): String {
+    val jsonData = JSON.toJSON(params)
+    val requestBody = jsonData.toString().toRequestBody(TYPE_JSON)
+    val okHttpClient = OkHttpClient()
+            .newBuilder()
+            .connectTimeout(30, TimeUnit.SECONDS) //设置连接超时时间
+            .readTimeout(30, TimeUnit.SECONDS) //设置读取超时时间
+            .build() //设置读取超时时间 //创建request请求对象
+    val request = Request.Builder()
+            .url(url)
+            .post(requestBody)
+            .build() //创建call并调用enqueue()方法实现网络请求
+    try {
+        val response = okHttpClient.newCall(request).execute()
+        return response.body?.string().toString()
+    } catch (e: IOException) {
+        e.printStackTrace()
+    }
+    return ""
+}
+
 @SuppressLint("HardwareIds")
 fun doPostJson(url: String, params: Map<String, Any>): String {
     val targetUrl = GlobalCode.HTTP_SERVER + url

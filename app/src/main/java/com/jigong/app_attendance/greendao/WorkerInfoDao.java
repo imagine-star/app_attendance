@@ -43,6 +43,11 @@ public class WorkerInfoDao extends AbstractDao<WorkerInfo, Long> {
         public final static Property WoreType = new Property(16, String.class, "woreType", false, "WORE_TYPE");
         public final static Property FaceImage = new Property(17, String.class, "faceImage", false, "FACE_IMAGE");
         public final static Property Present = new Property(18, boolean.class, "present", false, "PRESENT");
+        public final static Property Nation = new Property(19, String.class, "nation", false, "NATION");
+        public final static Property Address = new Property(20, String.class, "address", false, "ADDRESS");
+        public final static Property Idissue = new Property(21, String.class, "idissue", false, "IDISSUE");
+        public final static Property Idperiod = new Property(22, String.class, "idperiod", false, "IDPERIOD");
+        public final static Property Idphoto = new Property(23, String.class, "idphoto", false, "IDPHOTO");
     }
 
 
@@ -76,7 +81,12 @@ public class WorkerInfoDao extends AbstractDao<WorkerInfo, Long> {
                 "\"WORK_ROLE\" TEXT," + // 15: workRole
                 "\"WORE_TYPE\" TEXT," + // 16: woreType
                 "\"FACE_IMAGE\" TEXT," + // 17: faceImage
-                "\"PRESENT\" INTEGER NOT NULL );"); // 18: present
+                "\"PRESENT\" INTEGER NOT NULL ," + // 18: present
+                "\"NATION\" TEXT," + // 19: nation
+                "\"ADDRESS\" TEXT," + // 20: address
+                "\"IDISSUE\" TEXT," + // 21: idissue
+                "\"IDPERIOD\" TEXT," + // 22: idperiod
+                "\"IDPHOTO\" TEXT);"); // 23: idphoto
     }
 
     /** Drops the underlying database table. */
@@ -171,6 +181,31 @@ public class WorkerInfoDao extends AbstractDao<WorkerInfo, Long> {
             stmt.bindString(18, faceImage);
         }
         stmt.bindLong(19, entity.getPresent() ? 1L: 0L);
+ 
+        String nation = entity.getNation();
+        if (nation != null) {
+            stmt.bindString(20, nation);
+        }
+ 
+        String address = entity.getAddress();
+        if (address != null) {
+            stmt.bindString(21, address);
+        }
+ 
+        String idissue = entity.getIdissue();
+        if (idissue != null) {
+            stmt.bindString(22, idissue);
+        }
+ 
+        String idperiod = entity.getIdperiod();
+        if (idperiod != null) {
+            stmt.bindString(23, idperiod);
+        }
+ 
+        String idphoto = entity.getIdphoto();
+        if (idphoto != null) {
+            stmt.bindString(24, idphoto);
+        }
     }
 
     @Override
@@ -259,6 +294,31 @@ public class WorkerInfoDao extends AbstractDao<WorkerInfo, Long> {
             stmt.bindString(18, faceImage);
         }
         stmt.bindLong(19, entity.getPresent() ? 1L: 0L);
+ 
+        String nation = entity.getNation();
+        if (nation != null) {
+            stmt.bindString(20, nation);
+        }
+ 
+        String address = entity.getAddress();
+        if (address != null) {
+            stmt.bindString(21, address);
+        }
+ 
+        String idissue = entity.getIdissue();
+        if (idissue != null) {
+            stmt.bindString(22, idissue);
+        }
+ 
+        String idperiod = entity.getIdperiod();
+        if (idperiod != null) {
+            stmt.bindString(23, idperiod);
+        }
+ 
+        String idphoto = entity.getIdphoto();
+        if (idphoto != null) {
+            stmt.bindString(24, idphoto);
+        }
     }
 
     @Override
@@ -287,7 +347,12 @@ public class WorkerInfoDao extends AbstractDao<WorkerInfo, Long> {
             cursor.isNull(offset + 15) ? null : cursor.getString(offset + 15), // workRole
             cursor.isNull(offset + 16) ? null : cursor.getString(offset + 16), // woreType
             cursor.isNull(offset + 17) ? null : cursor.getString(offset + 17), // faceImage
-            cursor.getShort(offset + 18) != 0 // present
+            cursor.getShort(offset + 18) != 0, // present
+            cursor.isNull(offset + 19) ? null : cursor.getString(offset + 19), // nation
+            cursor.isNull(offset + 20) ? null : cursor.getString(offset + 20), // address
+            cursor.isNull(offset + 21) ? null : cursor.getString(offset + 21), // idissue
+            cursor.isNull(offset + 22) ? null : cursor.getString(offset + 22), // idperiod
+            cursor.isNull(offset + 23) ? null : cursor.getString(offset + 23) // idphoto
         );
         return entity;
     }
@@ -313,6 +378,11 @@ public class WorkerInfoDao extends AbstractDao<WorkerInfo, Long> {
         entity.setWoreType(cursor.isNull(offset + 16) ? null : cursor.getString(offset + 16));
         entity.setFaceImage(cursor.isNull(offset + 17) ? null : cursor.getString(offset + 17));
         entity.setPresent(cursor.getShort(offset + 18) != 0);
+        entity.setNation(cursor.isNull(offset + 19) ? null : cursor.getString(offset + 19));
+        entity.setAddress(cursor.isNull(offset + 20) ? null : cursor.getString(offset + 20));
+        entity.setIdissue(cursor.isNull(offset + 21) ? null : cursor.getString(offset + 21));
+        entity.setIdperiod(cursor.isNull(offset + 22) ? null : cursor.getString(offset + 22));
+        entity.setIdphoto(cursor.isNull(offset + 23) ? null : cursor.getString(offset + 23));
      }
     
     @Override

@@ -27,4 +27,14 @@ object MeiShanServer {
      */
     const val retResult = "${serverUrl}Service/DevicePacketWebSvr.assx/retResult"
 
+    /**
+     * 考勤上传接口
+     */
+    const val uploadData = "${serverUrl}Service/DevicePacketWebSvr.assx/uploadData"
+
+    /**
+     * 工人信息上传接口
+     */
+    const val registData = "${serverUrl}RegistData"
+
 }

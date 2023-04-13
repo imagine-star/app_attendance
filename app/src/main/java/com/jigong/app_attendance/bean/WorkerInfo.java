@@ -39,16 +39,18 @@ public class WorkerInfo {
     * 眉山新增
     * */
     private String nation;//民族
+    private String address;//住址
     private String idissue;//发证机关
     private String idperiod;//证件有效期
     private String idphoto;//身份证照片
 
-    @Generated(hash = 1057567392)
+    @Generated(hash = 1041479349)
     public WorkerInfo(Long id, String customId, String workerId, String workerCode,
             String name, String idNumber, String personType, String gender, String idCard,
             String cardType, String birthday, byte[] picURI, boolean getInfo, boolean hasPush,
             String isLeader, String workRole, String woreType, String faceImage,
-            boolean present) {
+            boolean present, String nation, String address, String idissue, String idperiod,
+            String idphoto) {
         this.id = id;
         this.customId = customId;
         this.workerId = workerId;
@@ -68,6 +70,11 @@ public class WorkerInfo {
         this.woreType = woreType;
         this.faceImage = faceImage;
         this.present = present;
+        this.nation = nation;
+        this.address = address;
+        this.idissue = idissue;
+        this.idperiod = idperiod;
+        this.idphoto = idphoto;
     }
 
     @Generated(hash = 1000580303)
@@ -224,6 +231,46 @@ public class WorkerInfo {
 
     public void setPresent(boolean present) {
         this.present = present;
+    }
+
+    public String getNation() {
+        return this.nation;
+    }
+
+    public void setNation(String nation) {
+        this.nation = nation;
+    }
+
+    public String getIdissue() {
+        return this.idissue;
+    }
+
+    public void setIdissue(String idissue) {
+        this.idissue = idissue;
+    }
+
+    public String getIdperiod() {
+        return this.idperiod;
+    }
+
+    public void setIdperiod(String idperiod) {
+        this.idperiod = idperiod;
+    }
+
+    public String getIdphoto() {
+        return this.idphoto;
+    }
+
+    public void setIdphoto(String idphoto) {
+        this.idphoto = idphoto;
+    }
+
+    public String getAddress() {
+        return this.address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 
 }

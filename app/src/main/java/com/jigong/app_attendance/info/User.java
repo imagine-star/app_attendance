@@ -21,6 +21,7 @@ public class User {
     private final String login = "login";
     private final String joinCity = "joinCity";
     private final String rowId = "rowId";
+    private final String getWorkerRowId = "getWorkerRowId";
     private final String signDate = "signDate";
     private final String gomeetToken = "gomeetToken";
     private final String joinCode = "joinCode";
@@ -79,6 +80,14 @@ public class User {
 
     public void setRowId(String rowId) {
         mPreferences.setStringValue(this.rowId, rowId);
+    }
+
+    public String getGetWorkerRowId() {
+        return mPreferences.getStringValue(getWorkerRowId, "0");
+    }
+
+    public void setGetWorkerRowId(String getWorkerRowId) {
+        mPreferences.setStringValue(this.getWorkerRowId, getWorkerRowId);
     }
 
     public String getJoinCity() {

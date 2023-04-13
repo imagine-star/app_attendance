@@ -82,6 +82,10 @@ public class AttendanceInfo {
         this.deviceSerialNo = deviceSerialNo;
     }
 
+    /**
+     * 出入口方向 进:"02" ，出口:"01" ,无方向: "unknown"
+     * @return 出入口方向
+     */
     public String getMachineType() {
         return this.machineType;
     }

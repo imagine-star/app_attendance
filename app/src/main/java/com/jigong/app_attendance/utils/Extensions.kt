@@ -24,6 +24,10 @@ infix fun String?.printWithDefault(default: String) = println(this ?: default)
 fun <T> T.easyPrint() {
     println(this)
 }
+
+/**
+ * 打印到控制台并记录日志
+ */
 @SuppressLint("SimpleDateFormat")
 fun <T> T.printAndLog() {
     println(this)

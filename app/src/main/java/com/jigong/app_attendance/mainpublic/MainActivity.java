@@ -68,14 +68,12 @@ public class MainActivity extends BaseActivity {
         User.getInstance().setInOnline(false);
         User.getInstance().setOutOnline(false);
         binding.userName.setText(User.getInstance().getJoinCity());
-        if (User.getInstance().getLogin()) {
-            startActivity(new Intent(MainActivity.this, InfoManageActivity.class));
-            finish();
-        } else {
-            binding.login.setOnClickListener(view1 -> {
-                MainActivityPermissionsDispatcher.doNextWithPermissionCheck(this);
-            });
+        if (!TextUtils.isEmpty(User.getInstance().getLoginPassword())) {
+            binding.passWard.setText(User.getInstance().getLoginPassword());
         }
+        binding.login.setOnClickListener(view1 -> {
+            MainActivityPermissionsDispatcher.doNextWithPermissionCheck(this);
+        });
     }
 
     @NeedsPermission({Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE})
@@ -126,6 +124,7 @@ public class MainActivity extends BaseActivity {
                         String respMsg = JsonUtils.getJsonValue(entry, "respMsg", "");
                         if (CheckUtilsKt.checkResult(GlobalCode.LOGIN_FOSHAN, result)) {
                             User.getInstance().setLogin(true);
+                            User.getInstance().setLoginPassword(binding.passWard.getText().toString().trim());
                             JSONObject dataObject = JsonUtils.getJSONObject(entry, "result");
 
                             String account = binding.userName.getText().toString().trim();

@@ -31,8 +31,8 @@ public class User {
     private final String joinPlatform = "joinPlatform";
     private final String developKey = "developKey";
     private final String developSecret = "developSecret";
-
     private final String deleteTime = "deleteTime";
+    private final String loginPassword = "loginPassword";
 
     private final SavedSharedPreferences mPreferences;
 
@@ -241,11 +241,19 @@ public class User {
     }
 
     public Long getDeleteTime() {
-        return mPreferences.getLongValue(developSecret, 0);
+        return mPreferences.getLongValue(deleteTime, 0);
     }
 
     public void setDeleteTime(Long deleteTime) {
         mPreferences.setLongValue(this.deleteTime, deleteTime);
+    }
+
+    public String getLoginPassword() {
+        return mPreferences.getStringValue(loginPassword, "");
+    }
+
+    public void setLoginPassword(String loginPassword) {
+        mPreferences.setStringValue(this.loginPassword, loginPassword);
     }
 
     public String getCollectionDevice() {

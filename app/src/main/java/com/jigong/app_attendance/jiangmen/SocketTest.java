@@ -24,7 +24,7 @@ public class SocketTest {
     private volatile static Boolean flagTwo = false;
 
     public static void connect() {
-        client = new NioClient(JiangMenServer.INSTANCE.getHOST(), JiangMenServer.INSTANCE.getPORT());
+        client = new NioClient(JiangMenServer.HOST, JiangMenServer.PORT);
     }
 
     public static void listen() {

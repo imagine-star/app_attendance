@@ -8,10 +8,6 @@ import android.os.Environment;
  * @Date 2022/11/10 13:51
  */
 public class GlobalCode {
-
-    public static final String HOST = "219.130.221.10";
-    public static final int PORT = 20028;
-
     /**
      * 考勤图片储存地址
      */
@@ -61,20 +57,5 @@ public class GlobalCode {
      * 修改第三方工人编号
      */
     public static String UPDATE_WORKER_THRID_NO = "api/worker/updateWorkerThirdNo/v1";
-
-    /**
-     * 合肥平台指令前缀
-     */
-    public static String TOPIC_PREFIX = "mqtt/" + User.getInstance().getUserName() + "/";
-
-    /**
-     * 向合肥平台推送上线/下线通知
-     */
-    public static String BASIC_PUSH = "mqtt/" + User.getInstance().getUserName() + "/basic";
-
-    /**
-     * 向合肥平台推送心跳通知
-     */
-    public static String HEARTBEAT_PUSH = "mqtt/" + User.getInstance().getUserName() + "/heartbeat";
 
 }

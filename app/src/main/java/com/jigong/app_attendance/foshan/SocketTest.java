@@ -25,7 +25,7 @@ public class SocketTest {
     private volatile static Boolean flagTwo = false;
 
     public static void connect() {
-        client = new NioClient(GlobalCode.HOST, GlobalCode.PORT);
+        client = new NioClient(FoShanServer.HOST, FoShanServer.PORT);
     }
 
     public static void listen() {

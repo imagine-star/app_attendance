@@ -25,18 +25,24 @@ class SelectPlatformActivity : BaseActivity() {
 
         platformList.add(Pair("江门", "279"))
         platformList.add(Pair("佛山", "283"))
-//        platforemList.add(Pair("眉山", "306"))
-//        platforemList.add(Pair("湖南", "300"))
-//        platforemList.add(Pair("陇明公", "301"))
+//        platformList.add(Pair("湖南", "300"))
+//        platformList.add(Pair("陇明公", "301"))
+//        platformList.add(Pair("眉山", "306"))
 
-        if (platformList.size == 1) {
-            User.getInstance().joinCity = platformList[0].second
+        /**
+         * 如果是已登录状态，直接进入登陆页面
+         */
+        if (User.getInstance().login) {
             startActivity(Intent(this, MainActivity::class.java))
             finish()
         }
 
-        if (User.getInstance().login) {
-            startActivity(Intent(this, InfoManageActivity::class.java))
+        /**
+         * 未登录，如果只有一个平台，直接进入登陆页面
+         */
+        if (platformList.size == 1) {
+            User.getInstance().joinCity = platformList[0].second
+            startActivity(Intent(this, MainActivity::class.java))
             finish()
         }
 

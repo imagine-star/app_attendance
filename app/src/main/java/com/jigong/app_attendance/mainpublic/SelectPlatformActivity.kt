@@ -15,33 +15,36 @@ class SelectPlatformActivity : BaseActivity() {
 
     private lateinit var binding: ActivitySelectPlatformBinding
 
-    private val platforemList: MutableList<Pair<String, String>> = mutableListOf()
+    private val platformList: MutableList<Pair<String, String>> = mutableListOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivitySelectPlatformBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)
-        platforemList.add(Pair("佛山", "283"))
-        platforemList.add(Pair("眉山", "306"))
+
+        platformList.add(Pair("江门", "279"))
+        platformList.add(Pair("佛山", "283"))
+//        platforemList.add(Pair("眉山", "306"))
 //        platforemList.add(Pair("湖南", "300"))
 //        platforemList.add(Pair("陇明公", "301"))
 
-        val layoutManager = LinearLayoutManager(this)
-        layoutManager.orientation = RecyclerView.VERTICAL
-        binding.recyclerView.layoutManager = layoutManager
-        val adapter = SelectPlatformAdapter(platforemList, this)
-        binding.recyclerView.adapter = adapter
-
-//        MyApplication.getApplication().daoSession.attendanceInfoDao.deleteAll()
-//        val attendanceList = MyApplication.getApplication().daoSession.attendanceInfoDao.queryBuilder().list()
-//        User.getInstance().rowId = "0"
-//        User.getInstance().signDate = ""
+        if (platformList.size == 1) {
+            User.getInstance().joinCity = platformList[0].second
+            startActivity(Intent(this, MainActivity::class.java))
+            finish()
+        }
 
         if (User.getInstance().login) {
             startActivity(Intent(this, InfoManageActivity::class.java))
             finish()
         }
+
+        val layoutManager = LinearLayoutManager(this)
+        layoutManager.orientation = RecyclerView.VERTICAL
+        binding.recyclerView.layoutManager = layoutManager
+        val adapter = SelectPlatformAdapter(platformList, this)
+        binding.recyclerView.adapter = adapter
 
 //        startService(Intent(this, FoShanService::class.java))
 

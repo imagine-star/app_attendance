@@ -1,27 +1,34 @@
-package com.jigong.app_attendance.foshan
+package com.jigong.app_attendance.jiangmen
 
 import android.content.Intent
 import android.os.IBinder
 import android.text.TextUtils
 import cn.hutool.socket.nio.NioClient
-import com.jigong.app_attendance.mainpublic.BaseService
-import com.jigong.app_attendance.mainpublic.MyApplication
 import com.jigong.app_attendance.bean.AttendanceInfo
 import com.jigong.app_attendance.info.GlobalCode
 import com.jigong.app_attendance.info.User
 import com.jigong.app_attendance.info.printAndLog
+import com.jigong.app_attendance.mainpublic.BaseService
+import com.jigong.app_attendance.mainpublic.MyApplication
 import com.jigong.app_attendance.utils.JsonUtils
 import com.jigong.app_attendance.utils.checkResult
 import com.jigong.app_attendance.utils.doPostJson
 import com.nanchen.compresshelper.CompressHelper
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.io.File
 import java.io.FileInputStream
 import java.io.IOException
-import java.util.*
+import java.util.ArrayList
+import java.util.HashMap
+import java.util.TimerTask
 
-class FoShanService : BaseService() {
+class JiangMenService : BaseService() {
 
     private val mainScope = MainScope()
 
@@ -37,11 +44,9 @@ class FoShanService : BaseService() {
     private val time30: Long = 1000 * 60 * 60
     private val timeLogin: Long = 1000 * 60 * 60 * 2
 
-    @DelicateCoroutinesApi
     override fun onCreate() {
         super.onCreate()
-        "服务已开始".printAndLog()
-        mainScope.launch(Dispatchers.Main) {
+        mainScope.launch(Dispatchers.IO) {
             run()
         }
     }
@@ -323,5 +328,4 @@ class FoShanService : BaseService() {
     override fun onBind(intent: Intent): IBinder {
         TODO("Return the communication channel to the service.")
     }
-
 }

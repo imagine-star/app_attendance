@@ -14,12 +14,21 @@ import com.jigong.app_attendance.info.printAndLog
 import com.jigong.app_attendance.mainpublic.BaseService
 import com.jigong.app_attendance.mainpublic.GlobalStatusCode
 import com.jigong.app_attendance.mainpublic.MyApplication
-import com.jigong.app_attendance.utils.*
-import kotlinx.coroutines.*
+import com.jigong.app_attendance.utils.JsonUtils
+import com.jigong.app_attendance.utils.checkResult
+import com.jigong.app_attendance.utils.doPost
+import com.jigong.app_attendance.utils.doPostJson
+import com.jigong.app_attendance.utils.doPostJsonNoHeader
+import com.jigong.app_attendance.utils.getMsg
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
 import java.nio.charset.StandardCharsets
-import java.util.*
+import java.util.TimerTask
 
 
 class MeiShanService : BaseService() {
@@ -53,6 +62,8 @@ class MeiShanService : BaseService() {
     override fun onCreate() {
         super.onCreate()
         "服务已开始".printAndLog()
+        User.getInstance().inOnline = true
+        User.getInstance().outOnline = true
         mainScope.launch(Dispatchers.Main) {
             run()
         }

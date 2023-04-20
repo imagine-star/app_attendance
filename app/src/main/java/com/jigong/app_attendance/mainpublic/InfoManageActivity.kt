@@ -1,15 +1,20 @@
 package com.jigong.app_attendance.mainpublic
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Environment
+import android.widget.Toast
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.jigong.app_attendance.databinding.ActivityInfoManageBinding
 import com.jigong.app_attendance.foshan.*
 import com.jigong.app_attendance.greendao.DaoMaster
 import com.jigong.app_attendance.hunan.HuNanService
 import com.jigong.app_attendance.info.User
-import com.jigong.app_attendance.info.printAndLog
+import com.jigong.app_attendance.jiangmen.JiangMenService
 import com.jigong.app_attendance.longminggong.LongMingGongService
 import com.jigong.app_attendance.meishan.MeiShanService
 import kotlinx.coroutines.Dispatchers
@@ -26,8 +31,7 @@ class InfoManageActivity : BaseActivity() {
         binding = ActivityInfoManageBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)
-        initView()
-        //        if (TextUtils.isEmpty(User.getInstance().joinCode)) {
+        initView() //        if (TextUtils.isEmpty(User.getInstance().joinCode)) {
         //            showToastMsgShort("该项目密钥未完善! projectId=" + User.getInstance().projectId + ", projectName=" + User.getInstance().projectName)
         //            return
         //        }
@@ -36,8 +40,7 @@ class InfoManageActivity : BaseActivity() {
             startActivity(intent)
         }
         binding.managerTitle.setOnLongClickListener {
-            val intent = Intent(this, ShowLogActivity::class.java)
-            startActivity(intent)
+            doNext()
             true
         }
 
@@ -51,14 +54,34 @@ class InfoManageActivity : BaseActivity() {
         }
     }
 
-    private fun getServiceIntent(): Intent? {
-        when (User.getInstance().joinCity) {
-            "283" -> return Intent(this, FoShanService::class.java)
-            "300" -> return Intent(this, HuNanService::class.java)
-            "301" -> return Intent(this, LongMingGongService::class.java)
-            "306" -> return Intent(this, MeiShanService::class.java)
+    private fun doNext() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE), 0x66)
+        } else {
+            val intent = Intent(this, ShowLogActivity::class.java)
+            startActivity(intent)
         }
-        return null
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String?>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == 0x66) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                val intent = Intent(this, ShowLogActivity::class.java)
+                startActivity(intent)
+            } else { //申请拒绝
+                Toast.makeText(this, "您已拒绝读写权限，...", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun getServiceIntent() = when (User.getInstance().joinCity) {
+        "279" -> Intent(this, JiangMenService::class.java)
+        "283" -> Intent(this, FoShanService::class.java)
+        "300" -> Intent(this, HuNanService::class.java)
+        "301" -> Intent(this, LongMingGongService::class.java)
+        "306" -> Intent(this, MeiShanService::class.java)
+        else -> null
     }
 
     private fun initView() {
@@ -91,7 +114,10 @@ class InfoManageActivity : BaseActivity() {
     }
 
     override fun onDestroy() {
-        stopService(Intent(this, FoShanService::class.java))
+        val intent = getServiceIntent()
+        if (intent != null) {
+            stopService(intent)
+        }
         super.onDestroy()
     }
 

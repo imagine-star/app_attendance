@@ -1,5 +1,4 @@
-package com.jigong.app_attendance.foshan;
-
+package com.jigong.app_attendance.jiangmen;
 
 import com.jigong.app_attendance.info.GlobalCode;
 
@@ -25,7 +24,7 @@ public class SocketTest {
     private volatile static Boolean flagTwo = false;
 
     public static void connect() {
-        client = new NioClient(GlobalCode.HOST, GlobalCode.PORT);
+        client = new NioClient(JiangMenServer.INSTANCE.getHOST(), JiangMenServer.INSTANCE.getPORT());
     }
 
     public static void listen() {

@@ -4,14 +4,18 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
@@ -30,6 +34,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import permissions.dispatcher.NeedsPermission;
+import permissions.dispatcher.RuntimePermissions;
+
+@RuntimePermissions
 public class MainActivity extends BaseActivity {
 
     private ActivityMainBinding binding;
@@ -65,32 +73,21 @@ public class MainActivity extends BaseActivity {
             finish();
         } else {
             binding.login.setOnClickListener(view1 -> {
-                doNext();
+                MainActivityPermissionsDispatcher.doNextWithPermissionCheck(this);
             });
         }
     }
 
-    private void doNext() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0x66);
-        } else {
-            loadData();
-            binding.login.setOnClickListener(null);
-        }
+    @NeedsPermission({Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE})
+    public void doNext() {
+        loadData();
+        binding.login.setOnClickListener(null);
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == 0x66) {
-            if (grantResults.length > 0
-                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                loadData();
-            } else {
-                //申请拒绝
-                Toast.makeText(this, "您已拒绝读写权限，...", Toast.LENGTH_SHORT).show();
-            }
-        }
+        MainActivityPermissionsDispatcher.onRequestPermissionsResult(this, requestCode, grantResults);
     }
 
     public void loadData() {
@@ -115,6 +112,7 @@ public class MainActivity extends BaseActivity {
                 map.put("joinCity", binding.userName.getText().toString().trim());
                 map.put("secret", "1" + binding.passWard.getText().toString().trim() + new Date().getTime());
                 map.put("sn", getDeviceSN());
+//                map.put("sn", "888888");
                 return OkHttpApiKt.doPostJson(GlobalCode.LOGIN_FOSHAN, map);
             }
 
@@ -176,15 +174,18 @@ public class MainActivity extends BaseActivity {
 
     public void setDevice(String projectId) {
         switch (User.getInstance().getJoinCity()) {
-            case "283":
-                User.getInstance().setInDeviceNo(projectId);//进场设备sn
-                User.getInstance().setOutDeviceNo(projectId.substring(0, 8) + "1");//出场设备sn
-                break;
             case "306":
                 User.getInstance().setCollectionDevice(projectId);
                 User.getInstance().setInDeviceNo(projectId.substring(0, 8) + "0");//进场设备sn
                 User.getInstance().setOutDeviceNo(projectId.substring(0, 8) + "1");//出场设备sn
                 break;
+            case "279":
+            case "283":
+            default:
+                User.getInstance().setInDeviceNo(projectId);//进场设备sn
+                User.getInstance().setOutDeviceNo(projectId.substring(0, 8) + "1");//出场设备sn
+                break;
+
         }
     }
 

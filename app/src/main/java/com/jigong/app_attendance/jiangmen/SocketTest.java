@@ -28,6 +28,9 @@ public class SocketTest {
     }
 
     public static void listen() {
+        if (!client.getChannel().isConnected()) {
+            return;
+        }
         client.setChannelHandler((sc) -> {
             ByteBuffer readBuffer = ByteBuffer.allocate(1024);
             //从channel读数据到缓冲区

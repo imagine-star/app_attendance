@@ -129,6 +129,9 @@ public class WorkerCodeSocketTest {
 
 
     public static void listen() {
+        if (!client.getChannel().isConnected()) {
+            return;
+        }
         client.setChannelHandler((sc) -> {
             ByteBuffer readBuffer = ByteBuffer.allocate(1024 * 50);
             int readBytes = sc.read(readBuffer);

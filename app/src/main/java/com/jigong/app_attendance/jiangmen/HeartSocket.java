@@ -23,6 +23,9 @@ public class HeartSocket {
         if (TextUtils.isEmpty(info)) {
             return;
         }
+        if (!HeartSocket.client.getChannel().isConnected()) {
+            return;
+        }
         try {
             byte[] m = HexUtil.hexStringToBytes(info);
             client.write(BufferUtil.create(m));
@@ -51,6 +54,9 @@ public class HeartSocket {
     }
 
     public static void listen() {
+        if (!client.getChannel().isConnected()) {
+            return;
+        }
         client.setChannelHandler((sc) -> {
             ByteBuffer readBuffer = ByteBuffer.allocate(5120);
             int readBytes = sc.read(readBuffer);

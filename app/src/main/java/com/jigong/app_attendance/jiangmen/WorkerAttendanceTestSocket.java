@@ -67,6 +67,9 @@ public class WorkerAttendanceTestSocket {
     }
 
     public static void listen() {
+        if (!client.getChannel().isConnected()) {
+            return;
+        }
         client.setChannelHandler((sc) -> {
             ByteBuffer readBuffer = ByteBuffer.allocate(5120);
             int readBytes = sc.read(readBuffer);

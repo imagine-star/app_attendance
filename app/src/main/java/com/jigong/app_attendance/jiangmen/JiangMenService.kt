@@ -46,6 +46,7 @@ class JiangMenService : BaseService() {
 
     override fun onCreate() {
         super.onCreate()
+        "服务已开始".printAndLog()
         mainScope.launch(Dispatchers.IO) {
             run()
         }

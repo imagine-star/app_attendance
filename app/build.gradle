@@ -112,4 +112,6 @@ dependencies {
 
     implementation 'com.github.nanchen2251:CompressHelper:1.0.5'
 
+    implementation 'com.github.jiusetian:EasySocket:2.1.1'
+
 }

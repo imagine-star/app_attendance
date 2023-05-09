@@ -3,10 +3,16 @@ package com.jigong.app_attendance.jiangmen
 import android.content.Intent
 import android.os.IBinder
 import android.text.TextUtils
-import cn.hutool.socket.nio.NioClient
+import com.easysocket.EasySocket
+import com.easysocket.config.EasySocketOptions
+import com.easysocket.entity.SocketAddress
+import com.easysocket.interfaces.conn.SocketActionListener
 import com.jigong.app_attendance.bean.AttendanceInfo
+import com.jigong.app_attendance.bean.WorkerInfo
+import com.jigong.app_attendance.greendao.WorkerInfoDao
 import com.jigong.app_attendance.info.GlobalCode
 import com.jigong.app_attendance.info.User
+import com.jigong.app_attendance.info.easyPrint
 import com.jigong.app_attendance.info.printAndLog
 import com.jigong.app_attendance.mainpublic.BaseService
 import com.jigong.app_attendance.mainpublic.MyApplication
@@ -16,7 +22,6 @@ import com.jigong.app_attendance.utils.doPostJson
 import com.nanchen.compresshelper.CompressHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -24,8 +29,8 @@ import org.json.JSONObject
 import java.io.File
 import java.io.FileInputStream
 import java.io.IOException
-import java.util.ArrayList
-import java.util.HashMap
+import java.nio.charset.StandardCharsets
+import java.util.Locale
 import java.util.TimerTask
 
 class JiangMenService : BaseService() {
@@ -36,59 +41,30 @@ class JiangMenService : BaseService() {
     private val workerInfoDao = MyApplication.getApplication().daoSession.workerInfoDao
     private val attendanceInfoDao = MyApplication.getApplication().daoSession.attendanceInfoDao
 
-    private var nioClientIn: NioClient? = null
-    private var nioClientOut: NioClient? = null
-
     private val time3: Long = 1000 * 60 * 3
     private val time5: Long = 1000 * 60 * 5
     private val time30: Long = 1000 * 60 * 60
     private val timeLogin: Long = 1000 * 60 * 60 * 2
 
+    private val LOGIN_IN = "4B03"
+    private val HEART_BEAT = "FFFF"
+    private val WORKER_CODE = "5103"
+    private val WORKER_INFO = "4D03"
+    private val UPLOAD_ATTENDANCE = "5003"
+
     override fun onCreate() {
         super.onCreate()
         "服务已开始".printAndLog()
         mainScope.launch(Dispatchers.IO) {
-            run()
+            initSocket()
         }
     }
 
     private suspend fun run() = withContext(Dispatchers.IO) {
         try {
-            while (true) {
-                try {
-                    val client = async(Dispatchers.IO) {
-                        login(User.getInstance().inDeviceNo)
-                    }
-                    nioClientIn = client.await()
-                    val clientOut = async(Dispatchers.IO) {
-                        login(User.getInstance().outDeviceNo)
-                    }
-                    nioClientOut = clientOut.await()
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-                if (nioClientIn != null) User.getInstance().inOnline = true
-                if (nioClientOut != null) User.getInstance().outOnline = true
-                if (nioClientIn != null && nioClientOut != null) {
-                    break
-                }
-            }
             timer.schedule(object : TimerTask() {
                 override fun run() {
-                    try {
-                        mainScope.launch(Dispatchers.IO) {
-                            val client = async(Dispatchers.IO) {
-                                login(User.getInstance().inDeviceNo)
-                            }
-                            nioClientIn = client.await()
-                            val clientOut = async(Dispatchers.IO) {
-                                login(User.getInstance().outDeviceNo)
-                            }
-                            nioClientOut = clientOut.await()
-                        }
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                    }
+                    login()
                 }
             }, timeLogin, timeLogin)
             /*
@@ -96,20 +72,8 @@ class JiangMenService : BaseService() {
             * */
             timer.schedule(object : TimerTask() {
                 override fun run() {
-                    try {
-                        if (nioClientIn != null) {
-                            BaseSocket.sendHeartInfo(nioClientIn)
-                        }
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                    }
-                    try {
-                        if (nioClientOut != null) {
-                            BaseSocket.sendHeartInfo(nioClientOut)
-                        }
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                    }
+                    val info = "0100000000000000000000000001FFFF" + User.getInstance().projectId + "0001"
+                    EasySocket.getInstance().upMessage(HexUtil.hexStringToBytes(info))
                 }
             }, 0, time5)
             /*
@@ -117,9 +81,9 @@ class JiangMenService : BaseService() {
             * */
             timer.schedule(object : TimerTask() {
                 override fun run() { //获取人员特征信息
-                    if (nioClientIn != null) {
-                        BaseSocket.getWorkerCode2(nioClientIn).printAndLog()
-                    }
+                    val content = "FFFF" + "FFFFFFFF"
+                    val length = Integer.toHexString((content.toByteArray().size + 2) / 2)
+                    sendData(length, content, WORKER_CODE)
                 }
             }, 0, time30)
             /*
@@ -141,14 +105,12 @@ class JiangMenService : BaseService() {
                 }
             }, 0, time3)
             /*
-            * 获取工人信息，3分钟左右一次
+            * 上传工人考勤，3分钟左右一次
             * */
             timer.schedule(object : TimerTask() {
                 override fun run() { //考勤上传
                     if (attendanceInfoDao.queryBuilder().count() > 0) {
-                        if (nioClientIn != null && nioClientOut != null) {
-                            uploadAttendanceList(nioClientIn, nioClientOut)
-                        }
+                        uploadAttendanceList()
                     }
                 }
             }, 0, time3)
@@ -157,17 +119,249 @@ class JiangMenService : BaseService() {
         }
     }
 
-    private fun login(deviceNo: String): NioClient {
-        val stringObjectMap = BaseSocket.doLoginandHeartbeat2(User.getInstance().joinCode, deviceNo)
-        val login = stringObjectMap["flag"] as Boolean?
-        val client = stringObjectMap["client"]
-        if (login == null || !login) {
-            ("设备登录失败! projectId=${User.getInstance().projectId}, projectName=${User.getInstance().projectName}，原因是：${stringObjectMap["reason"]}").printAndLog()
-        }
-        return client as NioClient
+    private fun login() {
+        inLogin = true
+        val deviceIdToHex = HexUtil.strTo16FullLength(User.getInstance().inDeviceNo, 64)
+        val companyCodeToHex = HexUtil.strTo16FullLength(User.getInstance().joinCode, 64)
+        val content = companyCodeToHex + deviceIdToHex
+        val length = Integer.toHexString((content.toByteArray().size + 2) / 2)
+        sendData(length, content, LOGIN_IN)
     }
 
-    fun uploadAttendanceList(clientIn: NioClient?, clientOut: NioClient?) {
+    /**
+     * 初始化socket连接
+     */
+    private fun initSocket() {
+
+        val options = EasySocketOptions.Builder()
+                .setSocketAddress(SocketAddress(JiangMenServer.HOST, JiangMenServer.PORT))
+                .setMaxReadBytes(Int.MAX_VALUE)
+                .build()
+        EasySocket.getInstance().createConnection(options, this) //创建一个socket连接
+        EasySocket.getInstance().subscribeSocketAction(object : SocketActionListener() {
+            override fun onSocketConnSuccess(socketAddress: SocketAddress) {
+                super.onSocketConnSuccess(socketAddress) //登录
+                login()
+            }
+
+            private var allData = "";
+
+            override fun onSocketResponse(socketAddress: SocketAddress, readData: ByteArray) {
+                if (readData.isNotEmpty()) {
+                    var body = HexUtil.BinaryToHexString(readData)
+                    if (!body.isNullOrEmpty()) {
+                        val code = body.substring(18, 20)
+                        val tail = body.substring(body.length - 2)
+                        if (tail == "01" && code == "00") {
+                            body = allData + body
+                            allData = ""
+                        } else {
+                            allData += body
+                            return
+                        }
+                    }
+                    if (!body.isNullOrEmpty()) {
+                        var cmd = ""
+                        if (body.length >= 20) {
+                            cmd = body.substring(28, 32)
+                        }
+                        when (cmd) {
+                            LOGIN_IN -> dealLogin(body)
+                            HEART_BEAT -> "接收到心跳返回数据$body".easyPrint()
+                            WORKER_CODE -> {
+                                if (body.isNotEmpty()) {
+                                    val length = HexUtil.reverseString(body.substring(2, 10)).toInt(16)
+                                    val code = body.substring(body.length - 4, body.length - 2)
+                                    if ("00" == code) {
+                                        "获取白名单成功, projectId=${User.getInstance().projectId}, 报文=$body".easyPrint()
+                                        val resultContent = body.substring(272)
+                                        dealWorkerCode(resultContent)
+                                    } else {
+                                        val resultContent = body.substring(64, 64 + length * 2)
+                                        ("获取白名单失败, projectId=" + User.getInstance().projectId + ", 原因是：" + HexUtil.hexStringToString(resultContent) + ", 返回报文: " + body).printAndLog()
+                                    }
+                                }
+                            }
+                            WORKER_INFO -> dealWorkerInfo(body)
+                            UPLOAD_ATTENDANCE -> dealAttendance(body)
+                        }
+                    }
+                }
+            }
+        })
+
+    }
+
+    private fun dealAttendance(body: String?) {
+        if (!body.isNullOrEmpty()) {
+            "接收到上传人员考勤信息返回数据$body".easyPrint()
+            val length = HexUtil.reverseString(body.substring(2, 10)).toInt(16)
+            val resultContent = body.substring(64, 64 + length * 2)
+            val code = body.substring(64 + length * 2, 66 + length * 2)
+            if ("00" == code) {
+                if (attendanceInfo != null) {
+                    "姓名：${attendanceInfo!!.workerName}，身份证号：${attendanceInfo!!.idNumber}，上传人员考勤信息成功！".printAndLog()
+                    attendanceInfoDao.delete(attendanceInfo)
+                    attendanceInfo = null
+                }
+            } else {
+                "上传人员考勤信息失败！原因是：${HexUtil.hexStringToString(resultContent)}".printAndLog()
+            }
+        }
+        uploadAttendanceList()
+    }
+
+    private fun dealWorkerInfo(body: String?) {
+        if (!body.isNullOrEmpty()) {
+            var workerCode = ""
+            var name: String? = ""
+            var idNumber: String? = ""
+            var gender: String? = ""
+            val lenth = HexUtil.reverseString(body.substring(2, 10)).toInt(16)
+            val code = body.substring(64 + lenth * 2, 66 + lenth * 2)
+            if ("00" == code || lenth > 100) {
+                println("获取人员特征信息成功, projectId=" + User.getInstance().projectId)
+                val resultContent = body.substring(64)
+                workerCode = resultContent.substring(0, 8)
+                name = cn.hutool.core.util.HexUtil.decodeHexStr(resultContent.substring(8, 68), StandardCharsets.UTF_8)
+                idNumber = cn.hutool.core.util.HexUtil.decodeHexStr(resultContent.substring(68, 104), StandardCharsets.US_ASCII)
+                gender = cn.hutool.core.util.HexUtil.decodeHexStr(resultContent.substring(106, 110), StandardCharsets.US_ASCII)
+                val string = HexUtil.reverseString(resultContent.substring(670, 678))
+                val glLong = string.toInt(16)
+                val bytes = cn.hutool.core.util.HexUtil.decodeHex(resultContent.substring(678, 678 + glLong * 2))
+                val workerInfoDao = MyApplication.getApplication().daoSession.workerInfoDao
+                var workerInfo = workerInfoDao.queryBuilder().where(WorkerInfoDao.Properties.IdNumber.eq(idNumber)).unique()
+                if (workerInfo == null) {
+                    workerInfo = WorkerInfo()
+                    workerInfo.workerCode = workerCode
+                    workerInfo.name = name
+                    workerInfo.idNumber = idNumber
+                    workerInfo.gender = gender
+                    workerInfo.picURI = bytes
+                    workerInfo.getInfo = true
+                    workerInfo.hasPush = false
+                    workerInfoDao.insert(workerInfo)
+                } else {
+                    workerInfo.workerCode = workerCode
+                    workerInfo.name = name
+                    workerInfo.idNumber = idNumber
+                    workerInfo.gender = gender
+                    workerInfo.picURI = bytes
+                    workerInfo.getInfo = true
+                    workerInfo.hasPush = false
+                    workerInfoDao.update(workerInfo)
+                }
+            } else {
+                val resultContent = body.substring(64, 64 + lenth * 2)
+                "获取人员信息失败, projectId=${User.getInstance().projectId}, 原因是：${HexUtil.hexStringToString(resultContent)}, 返回报文: ${body}"
+            }
+        }
+        getWorkerInfo()
+    }
+
+    private fun dealWorkerCode(resultContent: String) {
+        var workerCode = ""
+        var name: String? = ""
+        var idNumber: String? = ""
+        var length = resultContent.length
+        var index = 0
+        while (true) {
+            workerCode = resultContent.substring(index, index + 8)
+            name = cn.hutool.core.util.HexUtil.decodeHexStr(resultContent.substring(index + 8, index + 28), StandardCharsets.UTF_8).trim()
+            idNumber = cn.hutool.core.util.HexUtil.decodeHexStr(resultContent.substring(index + 28, index + 64), StandardCharsets.US_ASCII)
+            try {
+                var workerInfo = workerInfoDao.queryBuilder().where(WorkerInfoDao.Properties.IdNumber.eq(idNumber)).unique()
+                if (workerInfo == null) {
+                    workerInfo = WorkerInfo()
+                    workerInfo.workerCode = workerCode
+                    workerInfo.name = name
+                    workerInfo.idNumber = idNumber
+                    workerInfo.getInfo = false
+                    workerInfo.hasPush = false
+                    workerInfo.present = true
+                    workerInfoDao.insert(workerInfo)
+                }
+            } catch (e: java.lang.Exception) {
+                e.printStackTrace()
+            }
+            index += 82
+            length -= 82
+            if (length < 20) {
+                break
+            }
+        }
+        getWorkerInfo()
+    }
+
+    private fun getWorkerInfo() {
+        val workerInfoList = workerInfoDao.queryBuilder().list()
+        workerInfoList.forEach {
+            if (!it.getInfo) {
+                val idNumberToHex = HexUtil.strTo16FullLength(it.idNumber, 36)
+                val deviceIdToHex = HexUtil.strTo16FullLength(User.getInstance().inDeviceNo, 64)
+                val content = deviceIdToHex + idNumberToHex
+                var length = HexUtil.byte2Hex(HexUtil.unlong2H4bytes((content.length / 2 + 1).toLong()))
+                length = HexUtil.fullLength(length, 8)
+                sendData(length, content, WORKER_INFO)
+                return
+            }
+        }
+    }
+
+    private var inLogin = true
+
+    private fun dealLogin(body: String) {
+        "接收到设备登录返回数据$body".printAndLog()
+        val length = HexUtil.reverseString(body.substring(2, 10)).toInt(16)
+        val resultContent = body.substring(64, 64 + length * 2)
+        val code = body.substring(body.length - 4, body.length - 2)
+        if ("00" == code) {
+            "设备登陆成功！".printAndLog()
+
+            mainScope.launch(Dispatchers.Main) {
+                run()
+            }
+
+//            if (inLogin) {
+//                User.getInstance().inOnline = true
+//                inLogin = false
+//                val deviceIdToHex = HexUtil.strTo16FullLength(User.getInstance().outDeviceNo, 64)
+//                val companyCodeToHex = HexUtil.strTo16FullLength(User.getInstance().joinCode, 64)
+//                val content = companyCodeToHex + deviceIdToHex
+//                val dataLength = Integer.toHexString((content.toByteArray().size + 2) / 2)
+//                sendData(dataLength, content, LOGIN_IN)
+//            } else {
+//                User.getInstance().outOnline = true
+//                if (User.getInstance().inOnline && User.getInstance().outOnline) {
+//                    mainScope.launch(Dispatchers.Main) {
+//                        run()
+//                    }
+//                }
+//            }
+        } else {
+            "设备登陆失败！原因是：${HexUtil.hexStringToString(resultContent)}".printAndLog()
+        }
+
+    }
+
+    private fun sendData(length: String, content: String, cmd: String) { //设备登陆
+        val info = "01" +  //开始标记
+                HexUtil.full8(length) +  //长度 LEN
+                "00000000" +  //分包顺序索引
+                "00000000" +  //分包总数
+                "01" +  //版本
+                cmd +  //命令
+                User.getInstance().projectId.uppercase(Locale.ROOT) +
+                content +
+                HexUtil.getBCC(content.toByteArray()) +  //xor运算
+                "01" +  //状态
+                "01" //结束标记
+        EasySocket.getInstance().upMessage(HexUtil.hexStringToBytes(info))
+    }
+
+    private var attendanceInfo: AttendanceInfo? = null
+
+    fun uploadAttendanceList() {
         val attendanceList = if (attendanceInfoDao.count() > limitCount) {
             attendanceInfoDao.queryBuilder().limit(limitCount).list()
         } else {
@@ -190,18 +384,15 @@ class JiangMenService : BaseService() {
                 attendanceInfoDao.delete(it)
                 return@forEach
             }
-            try {
-                val booleanStringMap = BaseSocket.sendAttendance(workerCode, date, imageToByte, if (it.machineType.equals("02")) clientIn else clientOut)
-                if (booleanStringMap.isEmpty() || booleanStringMap.containsKey(false)) {
-                    ("${it.workerName}，身份证号：${it.idNumber}，人员考勤上传失败, 平台返回:${booleanStringMap[false]}").printAndLog()
-                } else {
-                    ("${it.workerName}，身份证号：${it.idNumber}，人员考勤上传成功").printAndLog()
-                    File(GlobalCode.FILE_PATH, it.normalSignImage).delete()
-                    attendanceInfoDao.delete(it)
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
+            attendanceInfo = it
+            val imageToHex = HexUtil.BinaryToHexString(imageToByte)
+            var imageLength = HexUtil.byte2Hex(HexUtil.unlong2H4bytes((imageToHex.length / 2).toLong()))
+            imageLength = HexUtil.fullLength(imageLength, 8)
+            val content = workerCode + date + "06" + imageLength + imageToHex
+            var lenth = HexUtil.byte2Hex(HexUtil.unlong2H4bytes((content.length / 2 + 1).toLong()))
+            lenth = HexUtil.fullLength(lenth, 8)
+            sendData(lenth, content, UPLOAD_ATTENDANCE)
+            return
         }
     }
 

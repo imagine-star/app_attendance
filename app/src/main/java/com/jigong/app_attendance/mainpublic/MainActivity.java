@@ -70,6 +70,7 @@ public class MainActivity extends BaseActivity {
         binding.userName.setText(User.getInstance().getJoinCity());
         if (!TextUtils.isEmpty(User.getInstance().getLoginPassword())) {
             binding.passWard.setText(User.getInstance().getLoginPassword());
+            MainActivityPermissionsDispatcher.doNextWithPermissionCheck(this);
         }
         binding.login.setOnClickListener(view1 -> {
             MainActivityPermissionsDispatcher.doNextWithPermissionCheck(this);

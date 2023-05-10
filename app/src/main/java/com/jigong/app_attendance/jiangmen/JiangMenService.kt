@@ -3,10 +3,6 @@ package com.jigong.app_attendance.jiangmen
 import android.content.Intent
 import android.os.IBinder
 import android.text.TextUtils
-import com.easysocket.EasySocket
-import com.easysocket.config.EasySocketOptions
-import com.easysocket.entity.SocketAddress
-import com.easysocket.interfaces.conn.SocketActionListener
 import com.jigong.app_attendance.bean.AttendanceInfo
 import com.jigong.app_attendance.bean.WorkerInfo
 import com.jigong.app_attendance.greendao.WorkerInfoDao
@@ -20,6 +16,15 @@ import com.jigong.app_attendance.utils.JsonUtils
 import com.jigong.app_attendance.utils.checkResult
 import com.jigong.app_attendance.utils.doPostJson
 import com.nanchen.compresshelper.CompressHelper
+import com.xuhao.didi.core.iocore.interfaces.IPulseSendable
+import com.xuhao.didi.core.iocore.interfaces.ISendable
+import com.xuhao.didi.core.pojo.OriginalData
+import com.xuhao.didi.core.protocol.IReaderProtocol
+import com.xuhao.didi.socket.client.sdk.OkSocket
+import com.xuhao.didi.socket.client.sdk.client.ConnectionInfo
+import com.xuhao.didi.socket.client.sdk.client.OkSocketOptions
+import com.xuhao.didi.socket.client.sdk.client.action.SocketActionAdapter
+import com.xuhao.didi.socket.client.sdk.client.connection.IConnectionManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
@@ -29,6 +34,7 @@ import org.json.JSONObject
 import java.io.File
 import java.io.FileInputStream
 import java.io.IOException
+import java.nio.ByteOrder
 import java.nio.charset.StandardCharsets
 import java.util.Locale
 import java.util.TimerTask
@@ -62,18 +68,18 @@ class JiangMenService : BaseService() {
 
     private suspend fun run() = withContext(Dispatchers.IO) {
         try {
-            timer.schedule(object : TimerTask() {
-                override fun run() {
-                    login()
-                }
-            }, timeLogin, timeLogin)
+//            timer.schedule(object : TimerTask() {
+//                override fun run() {
+//                    login()
+//                }
+//            }, timeLogin, timeLogin)
             /*
             * 向平台发送心跳，5分钟左右一次
             * */
             timer.schedule(object : TimerTask() {
                 override fun run() {
                     val info = "0100000000000000000000000001FFFF" + User.getInstance().projectId + "0001"
-                    EasySocket.getInstance().upMessage(HexUtil.hexStringToBytes(info))
+                    inManager.send { HexUtil.hexStringToBytes(info) }
                 }
             }, 0, time5)
             /*
@@ -128,67 +134,104 @@ class JiangMenService : BaseService() {
         sendData(length, content, LOGIN_IN)
     }
 
+    private lateinit var inManager: IConnectionManager
+
     /**
      * 初始化socket连接
      */
     private fun initSocket() {
 
-        val options = EasySocketOptions.Builder()
-                .setSocketAddress(SocketAddress(JiangMenServer.HOST, JiangMenServer.PORT))
-                .setMaxReadBytes(Int.MAX_VALUE)
-                .build()
-        EasySocket.getInstance().createConnection(options, this) //创建一个socket连接
-        EasySocket.getInstance().subscribeSocketAction(object : SocketActionListener() {
-            override fun onSocketConnSuccess(socketAddress: SocketAddress) {
-                super.onSocketConnSuccess(socketAddress) //登录
+        val inConnect = ConnectionInfo(JiangMenServer.HOST, JiangMenServer.PORT)
+        inManager = OkSocket.open(inConnect)
+        val option = inManager.option
+        val inBuilder = OkSocketOptions.Builder(option)
+//        inBuilder.setMaxReadDataMB(10)
+        inBuilder.setIOThreadMode(OkSocketOptions.IOThreadMode.SIMPLEX)
+//        inBuilder.setWritePackageBytes(1000000)
+        inBuilder.setConnectTimeoutSecond(20000)
+        inBuilder.setReaderProtocol(object : IReaderProtocol {
+            override fun getHeaderLength(): Int {
+                return 32
+            }
+
+            override fun getBodyLength(header: ByteArray?, byteOrder: ByteOrder?): Int {
+                if (header != null && header.isNotEmpty()) {
+                    val body = HexUtil.BinaryToHexString(header)
+                    if (!body.isNullOrEmpty()) {
+                        val length = HexUtil.reverseString(body.substring(2, 10)).toInt(16)
+                        return length + 2
+                    }
+                }
+                return 0
+            }
+
+        })
+        inManager.option(inBuilder.build())
+        inManager.registerReceiver(object : SocketActionAdapter() {
+            override fun onSocketConnectionSuccess(info: ConnectionInfo?, action: String?) {
+                super.onSocketConnectionSuccess(info, action)
                 login()
             }
 
-            private var allData = "";
+            override fun onSocketWriteResponse(info: ConnectionInfo?, action: String?, data: ISendable?) {
+                super.onSocketWriteResponse(info, action, data)
+            }
 
-            override fun onSocketResponse(socketAddress: SocketAddress, readData: ByteArray) {
-                if (readData.isNotEmpty()) {
-                    var body = HexUtil.BinaryToHexString(readData)
-                    if (!body.isNullOrEmpty()) {
-                        val code = body.substring(18, 20)
-                        val tail = body.substring(body.length - 2)
-                        if (tail == "01" && code == "00") {
-                            body = allData + body
-                            allData = ""
-                        } else {
-                            allData += body
-                            return
-                        }
-                    }
-                    if (!body.isNullOrEmpty()) {
-                        var cmd = ""
-                        if (body.length >= 20) {
-                            cmd = body.substring(28, 32)
-                        }
-                        when (cmd) {
-                            LOGIN_IN -> dealLogin(body)
-                            HEART_BEAT -> "接收到心跳返回数据$body".easyPrint()
-                            WORKER_CODE -> {
-                                if (body.isNotEmpty()) {
-                                    val length = HexUtil.reverseString(body.substring(2, 10)).toInt(16)
-                                    val code = body.substring(body.length - 4, body.length - 2)
-                                    if ("00" == code) {
-                                        "获取白名单成功, projectId=${User.getInstance().projectId}, 报文=$body".easyPrint()
-                                        val resultContent = body.substring(272)
-                                        dealWorkerCode(resultContent)
-                                    } else {
-                                        val resultContent = body.substring(64, 64 + length * 2)
-                                        ("获取白名单失败, projectId=" + User.getInstance().projectId + ", 原因是：" + HexUtil.hexStringToString(resultContent) + ", 返回报文: " + body).printAndLog()
+            override fun onSocketReadResponse(info: ConnectionInfo?, action: String?, data: OriginalData?) {
+                super.onSocketReadResponse(info, action, data)
+                if (data != null) {
+                    val headerByte = data.headBytes
+                    val bodyByte = data.bodyBytes
+                    if (headerByte != null && headerByte.isNotEmpty()) {
+                        val header = HexUtil.BinaryToHexString(headerByte)
+                        if (!header.isNullOrEmpty()) {
+                            val cmd = header.substring(28, 32)
+                            if (bodyByte != null && bodyByte.isNotEmpty()) {
+                                val body = HexUtil.BinaryToHexString(bodyByte)
+                                if (!body.isNullOrEmpty()) {
+                                    when (cmd) {
+                                        LOGIN_IN -> dealLogin(body)
+                                        HEART_BEAT -> "接收到心跳返回数据$body".easyPrint()
+                                        WORKER_CODE -> {
+                                            if (body.isNotEmpty()) {
+                                                val code = body.substring(body.length - 4, body.length - 2)
+                                                if ("00" == code) {
+                                                    "获取白名单成功, projectId=${User.getInstance().projectId}, 报文=$body".easyPrint()
+                                                    val resultContent = body.substring(208)
+                                                    dealWorkerCode(resultContent)
+                                                } else {
+                                                    val resultContent = body.substring(0, body.length - 4)
+                                                    "获取白名单失败, projectId=${User.getInstance().projectId}, 原因是：${HexUtil.hexStringToString(resultContent)}, 返回报文: $body".printAndLog()
+                                                }
+                                            }
+                                        }
+                                        WORKER_INFO -> dealWorkerInfo(body)
+                                        UPLOAD_ATTENDANCE -> dealAttendance(body)
                                     }
                                 }
                             }
-                            WORKER_INFO -> dealWorkerInfo(body)
-                            UPLOAD_ATTENDANCE -> dealAttendance(body)
                         }
                     }
                 }
             }
+
+            override fun onSocketIOThreadShutdown(action: String?, e: java.lang.Exception?) {
+                super.onSocketIOThreadShutdown(action, e)
+            }
+
+            override fun onSocketConnectionFailed(info: ConnectionInfo?, action: String?, e: java.lang.Exception?) {
+                super.onSocketConnectionFailed(info, action, e)
+            }
+
+            override fun onSocketDisconnection(info: ConnectionInfo?, action: String?, e: java.lang.Exception?) {
+                super.onSocketDisconnection(info, action, e)
+            }
+
+            override fun onPulseSend(info: ConnectionInfo?, data: IPulseSendable?) {
+                super.onPulseSend(info, data)
+            }
         })
+        inManager.connect()
 
     }
 
@@ -196,8 +239,8 @@ class JiangMenService : BaseService() {
         if (!body.isNullOrEmpty()) {
             "接收到上传人员考勤信息返回数据$body".easyPrint()
             val length = HexUtil.reverseString(body.substring(2, 10)).toInt(16)
-            val resultContent = body.substring(64, 64 + length * 2)
-            val code = body.substring(64 + length * 2, 66 + length * 2)
+            val resultContent = body.substring(0, length - 4)
+            val code = body.substring(body.length - 4, body.length - 2)
             if ("00" == code) {
                 if (attendanceInfo != null) {
                     "姓名：${attendanceInfo!!.workerName}，身份证号：${attendanceInfo!!.idNumber}，上传人员考勤信息成功！".printAndLog()
@@ -217,9 +260,9 @@ class JiangMenService : BaseService() {
             var name: String? = ""
             var idNumber: String? = ""
             var gender: String? = ""
-            val lenth = HexUtil.reverseString(body.substring(2, 10)).toInt(16)
-            val code = body.substring(64 + lenth * 2, 66 + lenth * 2)
-            if ("00" == code || lenth > 100) {
+            val length = body.length - 4
+            val code = body.substring(body.length - 4, body.length - 2)
+            if ("00" == code || length > 100) {
                 println("获取人员特征信息成功, projectId=" + User.getInstance().projectId)
                 val resultContent = body.substring(64)
                 workerCode = resultContent.substring(0, 8)
@@ -252,8 +295,8 @@ class JiangMenService : BaseService() {
                     workerInfoDao.update(workerInfo)
                 }
             } else {
-                val resultContent = body.substring(64, 64 + lenth * 2)
-                "获取人员信息失败, projectId=${User.getInstance().projectId}, 原因是：${HexUtil.hexStringToString(resultContent)}, 返回报文: ${body}"
+                val resultContent = body.substring(0, length - 4)
+                "获取人员信息失败, projectId=${User.getInstance().projectId}, 原因是：${HexUtil.hexStringToString(resultContent)}, 返回报文: $body"
             }
         }
         getWorkerInfo()
@@ -312,8 +355,6 @@ class JiangMenService : BaseService() {
 
     private fun dealLogin(body: String) {
         "接收到设备登录返回数据$body".printAndLog()
-        val length = HexUtil.reverseString(body.substring(2, 10)).toInt(16)
-        val resultContent = body.substring(64, 64 + length * 2)
         val code = body.substring(body.length - 4, body.length - 2)
         if ("00" == code) {
             "设备登陆成功！".printAndLog()
@@ -322,23 +363,24 @@ class JiangMenService : BaseService() {
                 run()
             }
 
-//            if (inLogin) {
-//                User.getInstance().inOnline = true
-//                inLogin = false
-//                val deviceIdToHex = HexUtil.strTo16FullLength(User.getInstance().outDeviceNo, 64)
-//                val companyCodeToHex = HexUtil.strTo16FullLength(User.getInstance().joinCode, 64)
-//                val content = companyCodeToHex + deviceIdToHex
-//                val dataLength = Integer.toHexString((content.toByteArray().size + 2) / 2)
-//                sendData(dataLength, content, LOGIN_IN)
-//            } else {
-//                User.getInstance().outOnline = true
-//                if (User.getInstance().inOnline && User.getInstance().outOnline) {
-//                    mainScope.launch(Dispatchers.Main) {
-//                        run()
-//                    }
-//                }
-//            }
+            //            if (inLogin) {
+            //                User.getInstance().inOnline = true
+            //                inLogin = false
+            //                val deviceIdToHex = HexUtil.strTo16FullLength(User.getInstance().outDeviceNo, 64)
+            //                val companyCodeToHex = HexUtil.strTo16FullLength(User.getInstance().joinCode, 64)
+            //                val content = companyCodeToHex + deviceIdToHex
+            //                val dataLength = Integer.toHexString((content.toByteArray().size + 2) / 2)
+            //                sendData(dataLength, content, LOGIN_IN)
+            //            } else {
+            //                User.getInstance().outOnline = true
+            //                if (User.getInstance().inOnline && User.getInstance().outOnline) {
+            //                    mainScope.launch(Dispatchers.Main) {
+            //                        run()
+            //                    }
+            //                }
+            //            }
         } else {
+            val resultContent = body.substring(0, body.length - 4)
             "设备登陆失败！原因是：${HexUtil.hexStringToString(resultContent)}".printAndLog()
         }
 
@@ -356,7 +398,15 @@ class JiangMenService : BaseService() {
                 HexUtil.getBCC(content.toByteArray()) +  //xor运算
                 "01" +  //状态
                 "01" //结束标记
-        EasySocket.getInstance().upMessage(HexUtil.hexStringToBytes(info))
+        inManager.send(SendData(info))
+        Thread.sleep(1000)
+    }
+
+    inner class SendData(val info: String) : ISendable {
+
+        override fun parse(): ByteArray {
+            return HexUtil.hexStringToBytes(info)
+        }
     }
 
     private var attendanceInfo: AttendanceInfo? = null
@@ -405,7 +455,10 @@ class JiangMenService : BaseService() {
             if (!oldFile.exists()) {
                 return null
             }
-            val file = CompressHelper.getDefault(this).compressToFile(oldFile)
+            val file = CompressHelper.Builder(this)
+                    .setQuality(10)
+                    .build()
+                    .compressToFile(oldFile)
             var inputStream: FileInputStream? = null
             try {
                 inputStream = FileInputStream(file)
